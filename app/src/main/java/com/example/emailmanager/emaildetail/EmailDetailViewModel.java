@@ -44,7 +44,8 @@ public class EmailDetailViewModel {
                 isAttach.set(emailDetail.getAccessoryList().size() > 0);
                 accessory.set(emailDetail.getAccessoryList().size() + "个附件");
                 adapter.refreshData(emailDetail.getAccessoryList());
-                webview.loadData(emailDetail.getContent(), "text/html", "utf-8");
+//                webview.loadData(emailDetail.getContent(), "text/html", "utf-8");
+                webview.loadDataWithBaseURL(null, emailDetail.getContent(), "text/html", "utf-8", null);
 
             }
         }

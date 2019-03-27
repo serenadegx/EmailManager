@@ -7,7 +7,12 @@ import com.example.emailmanager.data.AccessoryDetail;
 import com.example.emailmanager.data.AccountDetail;
 import com.example.emailmanager.data.EmailDetail;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -148,6 +153,7 @@ public class EmailRepository {
     }
 
     public static void dumpPart(Part p, EmailDetail data) throws Exception {
+
 //        if (p instanceof Message)
 //            dumpEnvelope((Message) p, data);
 
@@ -165,11 +171,6 @@ public class EmailRepository {
 
         String ct = p.getContentType();
         String filename = p.getFileName();
-        if (filename != null) {
-            data.getAccessoryList().add(new AccessoryDetail(MimeUtility.decodeText(filename), "", "100KB", false));
-            Log.i("mango", "FILENAME: " + MimeUtility.decodeText(filename));
-        }
-
         /*
          * Using isMimeType to determine the content type avoids
          * fetching the actual content data until we need it.
@@ -177,7 +178,7 @@ public class EmailRepository {
         if (p.isMimeType("text/plain")) {
             System.out.println((String) p.getContent());
             Log.i("mango", "Content: " + p.getContent());
-            data.setContent((String) p.getContent());
+//            data.setContent((String) p.getContent());
         } else if (p.isMimeType("multipart/*")) {
             Multipart mp = (Multipart) p.getContent();
 //            level++;
@@ -189,28 +190,21 @@ public class EmailRepository {
             dumpPart((Part) p.getContent(), data);
 //            level--;
         } else {
-//            if (!showStructure && !saveAttachments) {
-//                /*
-//                 * If we actually want to see the data, and it's not a
-//                 * MIME type we know, fetch it and check its Java type.
-//                 */
-//                Object o = p.getContent();
-//                if (o instanceof String) {
-//                    pr("This is a string");
-//                    pr("---------------------------");
-//                    System.out.println((String) o);
-//                } else if (o instanceof InputStream) {
-//                    pr("This is just an input stream");
-//                    pr("---------------------------");
-//                    InputStream is = (InputStream) o;
-//                    int c;
-//                    while ((c = is.read()) != -1)
-//                        System.out.write(c);
-//                } else {
-//                    pr("This is an unknown type");
-//                }
-//            }
-            Log.i("mango", "未知类型邮件");
+            Object o = p.getContent();
+            if (o instanceof InputStream) {
+                InputStream is = (InputStream) o;
+//                data.setContent(convertStreamToString(is));
+                if (filename != null) {
+                    data.getAccessoryList().add(new AccessoryDetail(MimeUtility.decodeText(filename), "", getPrintSize(p.getSize()), false));
+                    Log.i("mango", "FILENAME: " + MimeUtility.decodeText(filename));
+                }
+                Log.i("mango", "未知类型邮件InputStream");
+            } else if (o instanceof String) {
+                data.setContent((String) o);
+                Log.i("mango", "未知类型邮件string");
+            } else {
+                Log.i("mango", "未知类型邮件");
+            }
         }
 
         /*
@@ -220,6 +214,36 @@ public class EmailRepository {
          * mistakes.
          */
 
+    }
+
+
+    public static String getPrintSize(long size) {
+        //如果字节数少于1024，则直接以B为单位，否则先除于1024，后3位因太少无意义
+        if (size < 1024) {
+            return String.valueOf(size) + " B";
+        } else {
+            size = size / 1024;
+        }
+        //如果原字节数除于1024之后，少于1024，则可以直接以KB作为单位
+        //因为还没有到达要使用另一个单位的时候
+        //接下去以此类推
+        if (size < 1024) {
+            return String.valueOf(size) + " KB";
+        } else {
+            size = size / 1024;
+        }
+        if (size < 1024) {
+            //因为如果以MB为单位的话，要保留最后1位小数，
+            //因此，把此数乘以100之后再取余
+            size = size * 100;
+            return String.valueOf((size / 100)) + "."
+                    + String.valueOf((size * 100 / 1024 % 100)) + "MB";
+        } else {
+            //否则如果要以GB为单位的，先除于1024再作同样的处理
+            size = size * 100 / 1024;
+            return String.valueOf((size / 100)) + "."
+                    + String.valueOf((size % 100)) + " GB";
+        }
     }
 
     //    public static void dumpEnvelope(Message m, EmailDetail data) throws Exception {
@@ -262,4 +286,23 @@ public class EmailRepository {
     public void saveAttachment() {
     }
 
+    public static String convertStreamToString(InputStream is) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+        String line = null;
+        try {
+            while ((line = reader.readLine()) != null) {
+                sb.append(line + "/n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return sb.toString();
+    }
 }
