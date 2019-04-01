@@ -41,5 +41,5 @@ dependencies {
     //数据库配置
     implementation 'org.greenrobot:greendao:3.2.2'
     //WebView配置
-//    implementation 'com.github.serenadegx:XRWebview:1.0.7'
+    implementation 'com.github.serenadegx:XRWebview:1.0.9'
 }

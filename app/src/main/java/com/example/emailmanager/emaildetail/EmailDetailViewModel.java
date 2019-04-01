@@ -1,20 +1,18 @@
 package com.example.emailmanager.emaildetail;
 
 import android.content.Context;
-import android.databinding.ObservableArrayList;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
-import android.databinding.ObservableList;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.webkit.WebView;
 
-import com.example.emailmanager.data.AccessoryDetail;
 import com.example.emailmanager.data.EmailDetail;
 import com.example.emailmanager.data.source.EmailRepository;
 import com.example.emailmanager.emaildetail.adapter.AccessoryListAdapter;
+import com.example.xrwebviewlibrary.XRWebView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -45,7 +43,8 @@ public class EmailDetailViewModel {
                 accessory.set(emailDetail.getAccessoryList().size() + "个附件");
                 adapter.refreshData(emailDetail.getAccessoryList());
 //                webview.loadData(emailDetail.getContent(), "text/html", "utf-8");
-                webview.loadDataWithBaseURL(null, emailDetail.getContent(), "text/html", "utf-8", null);
+//                webview.loadDataWithBaseURL(null, emailDetail.getContent(), "text/html", "utf-8", null);
+                XRWebView.with(webview).simple().build().loadHtml(emailDetail.getContent(), "text/html", "utf-8");
 
             }
         }

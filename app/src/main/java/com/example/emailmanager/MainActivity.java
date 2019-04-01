@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.emailmanager.emails.InboxFragment;
+import com.example.emailmanager.msgsend.SendMsgActivity;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -31,8 +32,7 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                SendMsgActivity.start2SendMsgActivity(MainActivity.this);
             }
         });
 
@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity
 
         getSupportFragmentManager().beginTransaction().replace(R.id.fl_contain, new InboxFragment()).commit();
     }
+
 
     @Override
     public void onBackPressed() {

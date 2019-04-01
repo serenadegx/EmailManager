@@ -6,6 +6,7 @@ import android.util.Log;
 import com.example.emailmanager.data.AccessoryDetail;
 import com.example.emailmanager.data.AccountDetail;
 import com.example.emailmanager.data.EmailDetail;
+import com.sun.mail.smtp.SMTPTransport;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -29,10 +30,12 @@ import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Part;
 import javax.mail.PasswordAuthentication;
+import javax.mail.SendFailedException;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 
 public class EmailRepository {
@@ -154,21 +157,6 @@ public class EmailRepository {
 
     public static void dumpPart(Part p, EmailDetail data) throws Exception {
 
-//        if (p instanceof Message)
-//            dumpEnvelope((Message) p, data);
-
-        /** Dump input stream ..
-
-         InputStream is = p.getInputStream();
-         // If "is" is not already buffered, wrap a BufferedInputStream
-         // around it.
-         if (!(is instanceof BufferedInputStream))
-         is = new BufferedInputStream(is);
-         int c;
-         while ((c = is.read()) != -1)
-         System.out.write(c);
-         **/
-
         String ct = p.getContentType();
         String filename = p.getFileName();
         /*
@@ -217,6 +205,80 @@ public class EmailRepository {
     }
 
 
+    public void sendMsg(EmailDetail data) {
+        Properties props = System.getProperties();
+        props.put("mail.smtp.host", "smtp.qq.com");
+        props.put("mail.smtp.port", "465");
+        props.put("mail.smtp.ssl.enable", true);
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(
+                        "1099805713@qq.com", "pfujejqwrezxgbjj");
+            }
+        });
+
+        SMTPTransport t = null;
+        try {
+            Message msg = new MimeMessage(session);
+            if (data.getFrom() != null) {
+                try {
+                    msg.setFrom(new InternetAddress(data.getFrom()));
+                } catch (MessagingException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            msg.setRecipients(Message.RecipientType.TO,
+                    InternetAddress.parse(data.getTo(), false));
+//            if (cc != null)
+//                msg.setRecipients(Message.RecipientType.CC,
+//                        InternetAddress.parse(cc, false));
+//            if (bcc != null)
+//                msg.setRecipients(Message.RecipientType.BCC,
+//                        InternetAddress.parse(bcc, false));
+
+            msg.setSubject(data.getSubject());
+            t = (SMTPTransport) session.getTransport("smtp");
+            t.connect();
+            t.sendMessage(msg, msg.getAllRecipients());
+        } catch (SendFailedException e) {
+            e.printStackTrace();
+        } catch (NoSuchProviderException e) {
+            e.printStackTrace();
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                t.close();
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("\nMail was sent successfully.");
+    }
+
+    public static String convertStreamToString(InputStream is) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+        String line = null;
+        try {
+            while ((line = reader.readLine()) != null) {
+                sb.append(line + "/n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return sb.toString();
+    }
+
     public static String getPrintSize(long size) {
         //如果字节数少于1024，则直接以B为单位，否则先除于1024，后3位因太少无意义
         if (size < 1024) {
@@ -246,63 +308,9 @@ public class EmailRepository {
         }
     }
 
-    //    public static void dumpEnvelope(Message m, EmailDetail data) throws Exception {
-//        Address[] a;
-//        // FROM
-//        if ((a = m.getFrom()) != null) {
-//            for (int j = 0; j < a.length; j++)
-//                pr("FROM: " + a[j].toString());
-//        }
-//
-//        // REPLY TO
-//        if ((a = m.getReplyTo()) != null) {
-//            for (int j = 0; j < a.length; j++)
-//                pr("REPLY TO: " + a[j].toString());
-//        }
-//
-//        // TO
-//        if ((a = m.getRecipients(Message.RecipientType.TO)) != null) {
-//            for (int j = 0; j < a.length; j++) {
-//                pr("TO: " + a[j].toString());
-//                InternetAddress ia = (InternetAddress) a[j];
-//                if (ia.isGroup()) {
-//                    InternetAddress[] aa = ia.getGroup(false);
-//                    for (int k = 0; k < aa.length; k++)
-//                        pr("  GROUP: " + aa[k].toString());
-//                }
-//            }
-//        }
-//
-//        // SUBJECT
-//        m.getSubject();
-//
-//        // DATE
-//        m.getSentDate();
-//
-//    }
     public void saveContent(String content) {
     }
 
     public void saveAttachment() {
-    }
-
-    public static String convertStreamToString(InputStream is) {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        StringBuilder sb = new StringBuilder();
-        String line = null;
-        try {
-            while ((line = reader.readLine()) != null) {
-                sb.append(line + "/n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                is.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return sb.toString();
     }
 }

@@ -16,6 +16,9 @@ public class EmailDetail extends BaseObservable {
     private String content;
     private List<AccessoryDetail> accessoryList = new ArrayList<>();
 
+    public EmailDetail() {
+    }
+
     public EmailDetail(int id, String subject, String date, String from) {
         this.id = id;
         this.subject = subject;
