@@ -19,6 +19,11 @@ public interface EmailDataSource {
         void onDataNotAvailable();
     }
 
+    interface GetResultCallBack {
+        void onSuccess();
+        void onError(String ex);
+    }
+
     void getEmails(GetEmailsCallBack callBack);
 
     void getEmail(String id, GetEmailCallBack callBack);

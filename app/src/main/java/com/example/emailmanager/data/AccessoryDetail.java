@@ -9,6 +9,10 @@ public class AccessoryDetail extends BaseObservable {
     private String size;
     private boolean isDownload;
 
+    public AccessoryDetail(String fileName) {
+        this.fileName = fileName;
+    }
+
     public AccessoryDetail(String fileName, String downloadUrl, String size, boolean isDownload) {
         this.fileName = fileName;
         this.downloadUrl = downloadUrl;

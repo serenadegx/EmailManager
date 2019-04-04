@@ -36,9 +36,11 @@ import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 
 public class EmailRepository {
+    String personal;
 
     public void loadData(EmailDataSource.GetEmailsCallBack callBack) {
 //        QueryBuilder<AccountDetail> queryBuilder = EMApplication.getDaoSession().getAccountDetailDao().queryBuilder();
@@ -77,6 +79,8 @@ public class EmailRepository {
             Message[] messages = inbox.getMessages();
             for (Message message : messages) {
                 InternetAddress address = (InternetAddress) message.getFrom()[0];
+                InternetAddress to = (InternetAddress) message.getRecipients(Message.RecipientType.TO)[0];
+                personal = to.getPersonal();
                 EmailDetail emailDetail = new EmailDetail(message.getMessageNumber(), message.getSubject(),
                         dateFormat(message.getReceivedDate()), TextUtils.isEmpty(address.getPersonal())
                         ? address.getAddress() : address.getPersonal());
@@ -141,13 +145,87 @@ public class EmailRepository {
             e.printStackTrace();
         } finally {
             try {
-//                inbox.close();
+                inbox.close();
                 store.close();
             } catch (MessagingException e) {
                 e.printStackTrace();
             }
         }
         return data;
+    }
+
+
+    public void sendMsg(EmailDetail data, EmailDataSource.GetResultCallBack callBack) {
+        Properties props = System.getProperties();
+        props.put("mail.smtp.host", "smtp.qq.com");
+        props.put("mail.smtp.port", "465");
+        props.put("mail.smtp.ssl.enable", true);
+        props.put("mail.smtp.auth", true);
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(
+                        "1099805713@qq.com", "pfujejqwrezxgbjj");
+            }
+        });
+        SMTPTransport t = null;
+        try {
+            Message msg = new MimeMessage(session);
+            if (data.getFrom() != null) {
+                try {
+                    msg.setFrom(new InternetAddress(data.getFrom(), "果心蕊菜牙xr"));
+                } catch (MessagingException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            msg.setRecipients(Message.RecipientType.TO,
+                    InternetAddress.parse(data.getTo(), false));
+            if (data.getCc() != null)
+                //抄送人
+                msg.setRecipients(Message.RecipientType.CC,
+                        InternetAddress.parse(data.getCc(), false));
+            if (data.getBcc() != null)
+                //秘密抄送人
+                msg.setRecipients(Message.RecipientType.BCC,
+                        InternetAddress.parse(data.getBcc(), false));
+
+            msg.setSubject(data.getSubject());
+
+            MimeMultipart mp = new MimeMultipart();
+            MimeBodyPart mbp1 = new MimeBodyPart();
+            mbp1.setText(data.getContent());
+            mp.addBodyPart(mbp1);
+            if (data.getAccessoryList() != null && data.getAccessoryList().size() > 0) {
+                for (AccessoryDetail detail : data.getAccessoryList()) {
+                    MimeBodyPart mbp2 = new MimeBodyPart();
+                    mbp2.attachFile(detail.getFileName());
+                    mp.addBodyPart(mbp2);
+                }
+            }
+            msg.setContent(mp);
+            msg.setSentDate(new Date());
+            t = (SMTPTransport) session.getTransport("smtp");
+            t.connect();
+            t.sendMessage(msg, msg.getAllRecipients());
+            callBack.onSuccess();
+        } catch (SendFailedException e) {
+            e.printStackTrace();
+            callBack.onError("发送失败");
+        } catch (NoSuchProviderException e) {
+            e.printStackTrace();
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                t.close();
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     public static String dateFormat(Date date) {
@@ -202,61 +280,6 @@ public class EmailRepository {
          * mistakes.
          */
 
-    }
-
-
-    public void sendMsg(EmailDetail data) {
-        Properties props = System.getProperties();
-        props.put("mail.smtp.host", "smtp.qq.com");
-        props.put("mail.smtp.port", "465");
-        props.put("mail.smtp.ssl.enable", true);
-        Session session = Session.getInstance(props, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(
-                        "1099805713@qq.com", "pfujejqwrezxgbjj");
-            }
-        });
-
-        SMTPTransport t = null;
-        try {
-            Message msg = new MimeMessage(session);
-            if (data.getFrom() != null) {
-                try {
-                    msg.setFrom(new InternetAddress(data.getFrom()));
-                } catch (MessagingException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            msg.setRecipients(Message.RecipientType.TO,
-                    InternetAddress.parse(data.getTo(), false));
-//            if (cc != null)
-//                msg.setRecipients(Message.RecipientType.CC,
-//                        InternetAddress.parse(cc, false));
-//            if (bcc != null)
-//                msg.setRecipients(Message.RecipientType.BCC,
-//                        InternetAddress.parse(bcc, false));
-
-            msg.setSubject(data.getSubject());
-            t = (SMTPTransport) session.getTransport("smtp");
-            t.connect();
-            t.sendMessage(msg, msg.getAllRecipients());
-        } catch (SendFailedException e) {
-            e.printStackTrace();
-        } catch (NoSuchProviderException e) {
-            e.printStackTrace();
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                t.close();
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            }
-        }
-
-        System.out.println("\nMail was sent successfully.");
     }
 
     public static String convertStreamToString(InputStream is) {
