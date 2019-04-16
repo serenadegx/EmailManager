@@ -1,12 +1,13 @@
 package com.example.emailmanager.account;
 
-import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 
 import com.example.emailmanager.R;
 import com.example.emailmanager.databinding.ActivityVerifyBinding;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 
 public class VerifyActivity extends AppCompatActivity {
     @Override

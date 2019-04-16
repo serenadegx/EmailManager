@@ -1,8 +1,9 @@
 package com.example.emailmanager.emaildetail;
 
-import android.databinding.ObservableBoolean;
-import android.databinding.ObservableField;
 import android.view.View;
+
+import androidx.databinding.ObservableBoolean;
+import androidx.databinding.ObservableField;
 
 public class AccessoryItemViewModel {
     public final ObservableField<String> fileName = new ObservableField<>();

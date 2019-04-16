@@ -19,10 +19,20 @@
             type="int" />
     </data>
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="@{()->adapter.goNext(item,position)}">
+
+        <View
+            android:id="@+id/v"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_margin="8dp"
+            android:background="@drawable/green_dot"
+            android:visibility="@{item.isRead ? View.INVISIBLE : View.VISIBLE}"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tv_from"
@@ -32,7 +42,7 @@
             android:layout_marginTop="10dp"
             android:text="@{item.from}"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
-            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/v"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -54,5 +64,5 @@
             android:text="@{item.date}"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="@id/tv_from" />
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

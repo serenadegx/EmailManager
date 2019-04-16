@@ -2,7 +2,6 @@ package com.example.emailmanager.account;
 
 import android.app.Activity;
 import android.content.Context;
-import android.databinding.ObservableField;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -26,6 +25,8 @@ import javax.mail.NoSuchProviderException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Store;
+
+import androidx.databinding.ObservableField;
 
 public class VerifyModel {
     private static final int SUCCESS = 1;

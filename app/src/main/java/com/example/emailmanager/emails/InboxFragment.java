@@ -1,10 +1,6 @@
 package com.example.emailmanager.emails;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +8,13 @@ import android.view.ViewGroup;
 import com.example.emailmanager.data.source.EmailRepository;
 import com.example.emailmanager.databinding.FragmentInboxBinding;
 import com.example.emailmanager.emails.adapter.EmailListAdapter;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
+import static java.security.AccessController.getContext;
 
 public class InboxFragment extends Fragment {
 

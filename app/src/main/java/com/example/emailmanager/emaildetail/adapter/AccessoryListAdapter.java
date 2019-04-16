@@ -1,8 +1,6 @@
 package com.example.emailmanager.emaildetail.adapter;
 
 import android.content.Context;
-import android.databinding.DataBindingUtil;
-import android.databinding.ViewDataBinding;
 import android.view.ViewGroup;
 
 import com.example.emailmanager.BR;
@@ -11,6 +9,9 @@ import com.example.emailmanager.data.AccessoryDetail;
 import com.example.emailmanager.data.EmailDetail;
 import com.example.emailmanager.utils.BaseAdapter;
 import com.example.emailmanager.utils.BaseViewHolder;
+
+import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ViewDataBinding;
 
 public class AccessoryListAdapter extends BaseAdapter<AccessoryDetail, BaseViewHolder> {
     public AccessoryListAdapter(Context context) {

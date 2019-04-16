@@ -16,7 +16,7 @@
             android:layout_gravity="center"
             android:orientation="vertical">
 
-            <android.support.design.widget.TextInputLayout
+            <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/til_email"
                 android:layout_width="240dp"
                 android:layout_height="wrap_content">
@@ -27,9 +27,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="邮箱" />
-            </android.support.design.widget.TextInputLayout>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <android.support.design.widget.TextInputLayout
+            <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/til_pwd"
                 android:layout_width="240dp"
                 android:layout_height="wrap_content">
@@ -40,7 +40,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="密码" />
-            </android.support.design.widget.TextInputLayout>
+            </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
                 android:textColor="@color/colorPrimary"

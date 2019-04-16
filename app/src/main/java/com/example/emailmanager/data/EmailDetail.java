@@ -1,14 +1,15 @@
 package com.example.emailmanager.data;
 
-import android.databinding.BaseObservable;
-import android.databinding.Bindable;
 
-import java.nio.channels.Pipe;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.databinding.BaseObservable;
+import androidx.databinding.Bindable;
+
 public class EmailDetail extends BaseObservable {
     private int id;
+    private boolean isRead;
     private String subject;
     private String date;
     private String from;
@@ -48,8 +49,18 @@ public class EmailDetail extends BaseObservable {
         return from;
     }
 
+    @Bindable
     public String getTo() {
         return to;
+    }
+
+    @Bindable
+    public boolean isRead() {
+        return isRead;
+    }
+
+    public void setRead(boolean read) {
+        isRead = read;
     }
 
     public void setId(int id) {

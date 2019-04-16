@@ -2,12 +2,8 @@ package com.example.emailmanager.emaildetail;
 
 import android.content.Context;
 import android.content.Intent;
-import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -18,6 +14,11 @@ import com.example.emailmanager.data.source.EmailRepository;
 import com.example.emailmanager.databinding.ActivityEmailDetailBinding;
 import com.example.emailmanager.emaildetail.adapter.AccessoryListAdapter;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 public class EmailDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -26,7 +27,7 @@ public class EmailDetailActivity extends AppCompatActivity {
         binding.rvAccessory.setLayoutManager(new LinearLayoutManager(this));
         AccessoryListAdapter listAdapter = new AccessoryListAdapter(this);
         binding.rvAccessory.setAdapter(listAdapter);
-        EmailDetailViewModel viewModel = new EmailDetailViewModel(this, new EmailRepository());
+        EmailDetailViewModel viewModel = new EmailDetailViewModel(this, new EmailRepository(),getIntent().getIntExtra("msgnum", 0));
         viewModel.setAdapter(listAdapter);
         WebView webView = new WebView(this);
         webView.getSettings().setJavaScriptEnabled(true);
@@ -40,7 +41,7 @@ public class EmailDetailActivity extends AppCompatActivity {
                 FrameLayout.LayoutParams.MATCH_PARENT));
         binding.setViewModel(viewModel);
         viewModel.setWebView(webView);
-        viewModel.loadDataById(getIntent().getIntExtra("msgnum", 0));
+        viewModel.loadDataById();
     }
 
     public static void start2EmailDetailActivity(Context context, int msgNum) {
