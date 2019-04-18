@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.mail.Authenticator;
+import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
 import javax.mail.PasswordAuthentication;
@@ -42,7 +43,7 @@ public class VerifyModel {
             switch (msg.what) {
                 case SUCCESS:
                     MainActivity.start2MainActivity(mContext);
-                    ((Activity)mContext).finish();
+                    ((Activity) mContext).finish();
                     break;
                 case ERROR:
                     Toast.makeText(mContext, "邮箱或密码有误", Toast.LENGTH_SHORT).show();
@@ -63,8 +64,8 @@ public class VerifyModel {
     }
 
     public void addAccount(View v) {
-        List<AccountDetail> accounts = EMApplication.getDaoSession().getAccountDetailDao().queryBuilder().where(AccountDetailDao.Properties.Account.eq(email.get())).list();
-        if (!(accounts != null && accounts.size() > 0)) {
+//        List<AccountDetail> accounts = EMApplication.getDaoSession().getAccountDetailDao().queryBuilder().where(AccountDetailDao.Properties.Account.eq(email.get())).list();
+//        if (!(accounts != null && accounts.size() > 0)) {
             Log.i("Mango", "addAccount");
             new Thread() {
                 @Override
@@ -86,6 +87,10 @@ public class VerifyModel {
                     try {
                         store = session.getStore("imap");
                         store.connect();
+                        Folder[] folders = store.getDefaultFolder().list();
+                        for (Folder folder : folders) {
+                            Log.i("Mango", "folderName" + folder.getName());
+                        }
                         add();
                         SystemClock.sleep(1000);
                         msg = "验证成功";
@@ -109,10 +114,9 @@ public class VerifyModel {
 
                 }
             }.start();
-        }else {
-            mHandler.sendEmptyMessage(SUCCESS);
-        }
-
+//        } else {
+//            mHandler.sendEmptyMessage(SUCCESS);
+//        }
 
 
     }

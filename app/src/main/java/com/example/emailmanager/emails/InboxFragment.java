@@ -17,7 +17,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import static java.security.AccessController.getContext;
 
 public class InboxFragment extends Fragment {
-
+    public static final String FLAG = "flag";
+    public static final int INBOX = 1;
+    public static final int SENT_MESSAGES = 2;
+    public static final int DRAFTS = 3;
+    public static final int DELETE = 4;
     private FragmentInboxBinding binding;
     private EmailsViewModel viewModel;
 
@@ -25,7 +29,23 @@ public class InboxFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setupListAdapter();
-        viewModel.loadEmails();
+        switch (getArguments().getInt(FLAG)) {
+            case INBOX:
+                viewModel.loadEmails();
+                break;
+            case SENT_MESSAGES:
+                viewModel.loadEmailsFromSent();
+                break;
+            case DRAFTS:
+                viewModel.loadEmailsFromDraft();
+                break;
+            case DELETE:
+                viewModel.loadEmailsFromDelete();
+                break;
+            default:
+                break;
+        }
+
     }
 
     @Nullable

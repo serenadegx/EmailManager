@@ -70,4 +70,54 @@ public class EmailsViewModel {
     public void setAdapter(EmailListAdapter listAdapter) {
         this.adapter = listAdapter;
     }
+
+    public void loadEmailsFromSent() {
+        new Thread() {
+            @Override
+            public void run() {
+                mEmailRepository.loadSentMessage(new EmailDataSource.GetEmailsCallBack() {
+                    @Override
+                    public void onEmailsLoaded(List<EmailDetail> emails) {
+
+                        Message message = Message.obtain();
+                        message.what = SUCCESS;
+                        message.obj = emails;
+                        mHandler.sendMessage(message);
+                    }
+
+                    @Override
+                    public void onDataNotAvailable() {
+                        mHandler.sendEmptyMessage(ERROR);
+                    }
+                });
+            }
+        }.start();
+    }
+
+    public void loadEmailsFromDraft() {
+        new Thread() {
+            @Override
+            public void run() {
+                mEmailRepository.loadDrafts(new EmailDataSource.GetEmailsCallBack() {
+                    @Override
+                    public void onEmailsLoaded(List<EmailDetail> emails) {
+
+                        Message message = Message.obtain();
+                        message.what = SUCCESS;
+                        message.obj = emails;
+                        mHandler.sendMessage(message);
+                    }
+
+                    @Override
+                    public void onDataNotAvailable() {
+                        mHandler.sendEmptyMessage(ERROR);
+                    }
+                });
+            }
+        }.start();
+    }
+
+    public void loadEmailsFromDelete() {
+
+    }
 }

@@ -44,8 +44,11 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-        getSupportFragmentManager().beginTransaction().replace(R.id.fl_contain, new InboxFragment()).commit();
+        Bundle bundle = new Bundle();
+        InboxFragment inboxFragment = new InboxFragment();
+        bundle.putInt(InboxFragment.FLAG, InboxFragment.INBOX);
+        inboxFragment.setArguments(bundle);
+        getSupportFragmentManager().beginTransaction().replace(R.id.fl_contain, inboxFragment).commit();
     }
 
 
@@ -86,16 +89,19 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
+        Bundle bundle = new Bundle();
+        InboxFragment inboxFragment = new InboxFragment();
         if (id == R.id.nav_inbox) {
-            // Handle the camera action
-        } else if (id == R.id.nav_unread) {
-
+            bundle.putInt(InboxFragment.FLAG, InboxFragment.INBOX);
+        } else if (id == R.id.nav_drafts) {
+            bundle.putInt(InboxFragment.FLAG, InboxFragment.DRAFTS);
         } else if (id == R.id.nav_send) {
-
-        } else if (id == R.id.nav_settings) {
+            bundle.putInt(InboxFragment.FLAG, InboxFragment.SENT_MESSAGES);
+        } else if (id == R.id.nav_delete) {
 
         }
+        inboxFragment.setArguments(bundle);
+        getSupportFragmentManager().beginTransaction().replace(R.id.fl_contain, inboxFragment).commit();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

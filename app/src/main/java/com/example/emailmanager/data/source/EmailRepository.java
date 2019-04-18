@@ -48,7 +48,7 @@ public class EmailRepository {
     static String content;
 
     /**
-     * 获取邮件列表
+     * 获取邮件列表(收件箱)
      *
      * @param callBack
      */
@@ -115,6 +115,129 @@ public class EmailRepository {
             }
         }
     }
+
+    /**
+     * 获取发件箱
+     *
+     * @param callBack
+     */
+    public void loadSentMessage(EmailDataSource.GetEmailsCallBack callBack) {
+        List<EmailDetail> data = new ArrayList<>();
+        Properties props = System.getProperties();
+        props.put("mail.imap.host", "imap.qq.com");
+        props.put("mail.imap.port", "993");
+        props.put("mail.imap.ssl.enable", true);
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(
+                        "1099805713@qq.com", "pfujejqwrezxgbjj");
+            }
+        });
+        session.setDebug(true);
+        Store store = null;
+        Folder inbox = null;
+        try {
+//            store = session.getStore(accountDetail.getReceiver().getProtocol());
+            store = session.getStore("imap");
+            store.connect();
+            inbox = store.getFolder("Sent Messages");
+            inbox.open(Folder.READ_ONLY);
+            Message[] messages = inbox.getMessages();
+            for (Message message : messages) {
+                InternetAddress address = (InternetAddress) message.getFrom()[0];
+                InternetAddress to = (InternetAddress) message.getRecipients(Message.RecipientType.TO)[0];
+                StringBuilder sb = new StringBuilder();
+                for (Address toAddress : message.getRecipients(Message.RecipientType.TO)) {
+                    sb.append(((InternetAddress) toAddress).getPersonal() + ",");
+                }
+                sb.replace(sb.length() - 1, sb.length(), "");
+                personal = to.getPersonal();
+                EmailDetail emailDetail = new EmailDetail(message.getMessageNumber(), message.getSubject(),
+                        dateFormat(message.getReceivedDate()), sb.toString());
+                //发件箱默认已读
+                emailDetail.setRead(true);
+                data.add(emailDetail);
+            }
+            Collections.reverse(data);
+            callBack.onEmailsLoaded(data);
+        } catch (NoSuchProviderException e) {
+            callBack.onDataNotAvailable();
+            e.printStackTrace();
+        } catch (MessagingException e) {
+            callBack.onDataNotAvailable();
+            e.printStackTrace();
+        } finally {
+            try {
+                inbox.close();
+                store.close();
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 获取草稿箱
+     * @param callBack
+     */
+    public void loadDrafts(EmailDataSource.GetEmailsCallBack callBack){
+        List<EmailDetail> data = new ArrayList<>();
+        Properties props = System.getProperties();
+        props.put("mail.imap.host", "imap.qq.com");
+        props.put("mail.imap.port", "993");
+        props.put("mail.imap.ssl.enable", true);
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(
+                        "1099805713@qq.com", "pfujejqwrezxgbjj");
+            }
+        });
+        session.setDebug(true);
+        Store store = null;
+        Folder inbox = null;
+        try {
+//            store = session.getStore(accountDetail.getReceiver().getProtocol());
+            store = session.getStore("imap");
+            store.connect();
+            inbox = store.getFolder("Drafts");
+            inbox.open(Folder.READ_ONLY);
+            Message[] messages = inbox.getMessages();
+            for (Message message : messages) {
+                InternetAddress address = (InternetAddress) message.getFrom()[0];
+                InternetAddress to = (InternetAddress) message.getRecipients(Message.RecipientType.TO)[0];
+                StringBuilder sb = new StringBuilder();
+                for (Address toAddress : message.getRecipients(Message.RecipientType.TO)) {
+                    sb.append(((InternetAddress) toAddress).getPersonal() + ",");
+                }
+                sb.replace(sb.length() - 1, sb.length(), "");
+                personal = to.getPersonal();
+                EmailDetail emailDetail = new EmailDetail(message.getMessageNumber(), message.getSubject(),
+                        dateFormat(message.getReceivedDate()), sb.toString());
+                //发件箱默认已读
+                emailDetail.setRead(true);
+                data.add(emailDetail);
+            }
+            Collections.reverse(data);
+            callBack.onEmailsLoaded(data);
+        } catch (NoSuchProviderException e) {
+            callBack.onDataNotAvailable();
+            e.printStackTrace();
+        } catch (MessagingException e) {
+            callBack.onDataNotAvailable();
+            e.printStackTrace();
+        } finally {
+            try {
+                inbox.close();
+                store.close();
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void loadDeleted(){}
 
     /**
      * 根据id查询邮件

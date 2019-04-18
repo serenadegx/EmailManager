@@ -29,6 +29,12 @@
         </activity>
         <activity android:name=".emaildetail.EmailDetailActivity" />
         <activity android:name=".msgsend.SendMsgActivity" />
+
+
+
+        <service android:name=".NewEmailService"> </service>
+
+
     </application>
 
 </manifest>
