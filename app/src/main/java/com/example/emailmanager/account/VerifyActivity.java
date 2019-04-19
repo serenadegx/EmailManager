@@ -26,26 +26,8 @@ public class VerifyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         ActivityVerifyBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_verify);
         binding.setViewModel(new VerifyModel("imap.qq.com", this));
+        //监听新邮件
         Intent intentService = new Intent(this, NewEmailService.class);
         startService(intentService);
-        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        Notification notification = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel mChannel = new NotificationChannel("1001", "name1", NotificationManager.IMPORTANCE_LOW);
-            notificationManager.createNotificationChannel(mChannel);
-            notification = new Notification.Builder(this)
-                    .setChannelId("1001")
-                    .setContentTitle("new messages")
-                    .setContentText("hahaha")
-                    .setSmallIcon(R.mipmap.ic_launcher).build();
-        } else {
-            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                    .setContentTitle("5 new messages")
-                    .setContentText("hahaha")
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setOngoing(true);//无效
-            notification = notificationBuilder.build();
-        }
-        notificationManager.notify(111123, notification);
     }
 }

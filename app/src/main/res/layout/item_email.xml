@@ -30,7 +30,7 @@
             android:layout_height="10dp"
             android:layout_margin="8dp"
             android:background="@drawable/green_dot"
-            android:visibility="@{item.isRead ? View.INVISIBLE : View.VISIBLE}"
+            android:visibility="@{item.isRead ? View.GONE : View.VISIBLE}"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -40,8 +40,10 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
             android:text="@{item.from}"
-            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            android:maxLength="20"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
             app:layout_constraintLeft_toRightOf="@id/v"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -49,11 +51,11 @@
             android:id="@+id/tv_subject"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
+            android:layout_margin="10dp"
+            android:maxLength="26"
             android:text="@{item.subject}"
+            app:layout_constraintLeft_toRightOf="@id/v"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="@id/tv_from"
             app:layout_constraintTop_toBottomOf="@id/tv_from" />
 
         <TextView
@@ -63,6 +65,6 @@
             android:layout_margin="10dp"
             android:text="@{item.date}"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="@id/tv_from" />
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

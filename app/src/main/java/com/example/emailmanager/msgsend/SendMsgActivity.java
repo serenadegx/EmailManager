@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.example.emailmanager.R;
 import com.example.emailmanager.data.source.EmailRepository;
@@ -28,6 +29,7 @@ public class SendMsgActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ActivityMsgSendBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_msg_send);
+        initToolbar(binding);
         viewModel = new SendMsgViewModel(this, new EmailRepository(), getIntent().getIntExtra("id", -1));
         binding.setViewModel(viewModel);
     }
@@ -76,6 +78,16 @@ public class SendMsgActivity extends AppCompatActivity {
                     }
                 }).show();
 
+    }
+
+    private void initToolbar(ActivityMsgSendBinding binding) {
+        setSupportActionBar(binding.toolbar);
+        binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     public static void start2SendMsgActivity(Context context) {

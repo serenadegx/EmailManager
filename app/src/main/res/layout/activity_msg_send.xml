@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -14,6 +15,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:navigationIcon="@mipmap/back"
+            app:title="新建邮件"
+            app:titleTextColor="@android:color/white" />
 
         <ScrollView
             android:layout_width="match_parent"
@@ -51,7 +61,8 @@
                         android:layout_marginEnd="10dp"
                         android:layout_weight="1"
                         android:onClick="@{viewModel::addReceiver}"
-                        android:src="@mipmap/ic_launcher" />
+                        android:padding="14dp"
+                        android:src="@mipmap/icon_add" />
                 </LinearLayout>
 
                 <View
@@ -77,10 +88,10 @@
                         android:text="抄&#12288;送:" />
 
                     <EditText
-                        android:text="@={viewModel.copy}"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="4" />
+                        android:layout_weight="4"
+                        android:text="@={viewModel.copy}" />
 
                     <ImageView
                         android:layout_width="0dp"
@@ -88,7 +99,8 @@
                         android:layout_marginEnd="10dp"
                         android:layout_weight="1"
                         android:onClick="@{viewModel::addCopy}"
-                        android:src="@mipmap/ic_launcher" />
+                        android:padding="14dp"
+                        android:src="@mipmap/icon_add" />
                 </LinearLayout>
 
                 <View
@@ -114,10 +126,10 @@
                         android:text="密&#12288;送:" />
 
                     <EditText
-                        android:text="@={viewModel.secret}"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="4" />
+                        android:layout_weight="4"
+                        android:text="@={viewModel.secret}" />
 
                     <ImageView
                         android:layout_width="0dp"
@@ -125,7 +137,8 @@
                         android:layout_marginEnd="10dp"
                         android:layout_weight="1"
                         android:onClick="@{viewModel::addSecret}"
-                        android:src="@mipmap/ic_launcher" />
+                        android:padding="14dp"
+                        android:src="@mipmap/icon_add" />
                 </LinearLayout>
 
                 <View
@@ -151,17 +164,18 @@
                         android:text="发件人:" />
 
                     <EditText
-                        android:text="@={viewModel.send}"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="4" />
+                        android:layout_weight="4"
+                        android:text="@={viewModel.send}" />
 
                     <ImageView
                         android:layout_width="0dp"
                         android:layout_height="50dp"
                         android:layout_marginEnd="10dp"
                         android:layout_weight="1"
-                        android:src="@mipmap/ic_launcher" />
+                        android:padding="14dp"
+                        android:src="@mipmap/icon_add" />
                 </LinearLayout>
 
                 <View
@@ -187,11 +201,11 @@
                         android:text="主&#12288;题:" />
 
                     <EditText
-                        android:text="@={viewModel.subject}"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="10dp"
-                        android:layout_weight="5" />
+                        android:layout_weight="5"
+                        android:text="@={viewModel.subject}" />
                 </LinearLayout>
 
                 <View
@@ -207,9 +221,9 @@
                     android:layout_height="wrap_content" />
 
                 <EditText
-                    android:text="@={viewModel.content}"
                     android:layout_width="match_parent"
-                    android:layout_height="280dp" />
+                    android:layout_height="280dp"
+                    android:text="@={viewModel.content}" />
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

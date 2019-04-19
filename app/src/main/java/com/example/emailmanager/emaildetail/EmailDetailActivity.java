@@ -2,11 +2,9 @@ package com.example.emailmanager.emaildetail;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.webkit.WebSettings;
+import android.view.View;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
 import com.example.emailmanager.R;
@@ -24,24 +22,28 @@ public class EmailDetailActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ActivityEmailDetailBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_email_detail);
+        initToolbar(binding);
         binding.rvAccessory.setLayoutManager(new LinearLayoutManager(this));
         AccessoryListAdapter listAdapter = new AccessoryListAdapter(this);
         binding.rvAccessory.setAdapter(listAdapter);
-        EmailDetailViewModel viewModel = new EmailDetailViewModel(this, new EmailRepository(),getIntent().getIntExtra("msgnum", 0));
+        EmailDetailViewModel viewModel = new EmailDetailViewModel(this, new EmailRepository(), getIntent().getIntExtra("msgnum", 0));
         viewModel.setAdapter(listAdapter);
         WebView webView = new WebView(this);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setBlockNetworkImage(false);
-
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            webView.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-        }
-        webView.setWebViewClient(new WebViewClient());
-        binding.flCon.addView(webView, new FrameLayout.LayoutParams( FrameLayout.LayoutParams.MATCH_PARENT,
+        binding.flCon.addView(webView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT));
         binding.setViewModel(viewModel);
         viewModel.setWebView(webView);
         viewModel.loadDataById();
+    }
+
+    private void initToolbar(ActivityEmailDetailBinding binding) {
+        setSupportActionBar(binding.toolbar);
+        binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     public static void start2EmailDetailActivity(Context context, int msgNum) {
