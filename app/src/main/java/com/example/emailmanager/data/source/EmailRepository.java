@@ -77,7 +77,7 @@ public class EmailRepository {
                         "1099805713@qq.com", "pfujejqwrezxgbjj");
             }
         });
-        session.setDebug(true);
+//        session.setDebug(true);
         Store store = null;
         Folder inbox = null;
         try {
@@ -134,7 +134,7 @@ public class EmailRepository {
                         "1099805713@qq.com", "pfujejqwrezxgbjj");
             }
         });
-        session.setDebug(true);
+//        session.setDebug(true);
         Store store = null;
         Folder inbox = null;
         try {
@@ -194,7 +194,7 @@ public class EmailRepository {
                         "1099805713@qq.com", "pfujejqwrezxgbjj");
             }
         });
-        session.setDebug(true);
+//        session.setDebug(true);
         Store store = null;
         Folder inbox = null;
         try {
@@ -258,7 +258,7 @@ public class EmailRepository {
                         "1099805713@qq.com", "pfujejqwrezxgbjj");
             }
         });
-        session.setDebug(true);
+//        session.setDebug(true);
         Store store = null;
         Folder inbox = null;
         try {
@@ -476,7 +476,7 @@ public class EmailRepository {
                         "1099805713@qq.com", "pfujejqwrezxgbjj");
             }
         });
-        session.setDebug(true);
+//        session.setDebug(true);
         Store store = null;
         Folder inbox = null;
         try {
@@ -521,7 +521,7 @@ public class EmailRepository {
                         "1099805713@qq.com", "pfujejqwrezxgbjj");
             }
         });
-        session.setDebug(true);
+//        session.setDebug(true);
         Store store = null;
         Folder inbox = null;
         try {
