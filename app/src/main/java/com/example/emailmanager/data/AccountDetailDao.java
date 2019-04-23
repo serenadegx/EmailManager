@@ -28,10 +28,9 @@ public class AccountDetailDao extends AbstractDao<AccountDetail, Long> {
         public final static Property Id = new Property(0, long.class, "id", true, "_id");
         public final static Property Account = new Property(1, String.class, "account", false, "ACCOUNT");
         public final static Property Pwd = new Property(2, String.class, "pwd", false, "PWD");
-        public final static Property EmailCategoryId = new Property(3, int.class, "emailCategoryId", false, "EMAIL_CATEGORY_ID");
-        public final static Property EmailCategory = new Property(4, String.class, "emailCategory", false, "EMAIL_CATEGORY");
-        public final static Property Enable = new Property(5, boolean.class, "enable", false, "ENABLE");
-        public final static Property CustomId = new Property(6, long.class, "customId", false, "CUSTOM_ID");
+        public final static Property EmailId = new Property(3, long.class, "emailId", false, "EMAIL_ID");
+        public final static Property IsCur = new Property(4, boolean.class, "isCur", false, "IS_CUR");
+        public final static Property Remark = new Property(5, String.class, "remark", false, "REMARK");
     }
 
     private DaoSession daoSession;
@@ -51,12 +50,11 @@ public class AccountDetailDao extends AbstractDao<AccountDetail, Long> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"ACCOUNT_DETAIL\" (" + //
                 "\"_id\" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ," + // 0: id
-                "\"ACCOUNT\" TEXT," + // 1: account
-                "\"PWD\" TEXT," + // 2: pwd
-                "\"EMAIL_CATEGORY_ID\" INTEGER NOT NULL ," + // 3: emailCategoryId
-                "\"EMAIL_CATEGORY\" TEXT," + // 4: emailCategory
-                "\"ENABLE\" INTEGER NOT NULL ," + // 5: enable
-                "\"CUSTOM_ID\" INTEGER NOT NULL );"); // 6: customId
+                "\"ACCOUNT\" TEXT NOT NULL ," + // 1: account
+                "\"PWD\" TEXT NOT NULL ," + // 2: pwd
+                "\"EMAIL_ID\" INTEGER NOT NULL ," + // 3: emailId
+                "\"IS_CUR\" INTEGER NOT NULL ," + // 4: isCur
+                "\"REMARK\" TEXT);"); // 5: remark
     }
 
     /** Drops the underlying database table. */
@@ -69,48 +67,30 @@ public class AccountDetailDao extends AbstractDao<AccountDetail, Long> {
     protected final void bindValues(DatabaseStatement stmt, AccountDetail entity) {
         stmt.clearBindings();
         stmt.bindLong(1, entity.getId());
+        stmt.bindString(2, entity.getAccount());
+        stmt.bindString(3, entity.getPwd());
+        stmt.bindLong(4, entity.getEmailId());
+        stmt.bindLong(5, entity.getIsCur() ? 1L: 0L);
  
-        String account = entity.getAccount();
-        if (account != null) {
-            stmt.bindString(2, account);
+        String remark = entity.getRemark();
+        if (remark != null) {
+            stmt.bindString(6, remark);
         }
- 
-        String pwd = entity.getPwd();
-        if (pwd != null) {
-            stmt.bindString(3, pwd);
-        }
-        stmt.bindLong(4, entity.getEmailCategoryId());
- 
-        String emailCategory = entity.getEmailCategory();
-        if (emailCategory != null) {
-            stmt.bindString(5, emailCategory);
-        }
-        stmt.bindLong(6, entity.getEnable() ? 1L: 0L);
-        stmt.bindLong(7, entity.getCustomId());
     }
 
     @Override
     protected final void bindValues(SQLiteStatement stmt, AccountDetail entity) {
         stmt.clearBindings();
         stmt.bindLong(1, entity.getId());
+        stmt.bindString(2, entity.getAccount());
+        stmt.bindString(3, entity.getPwd());
+        stmt.bindLong(4, entity.getEmailId());
+        stmt.bindLong(5, entity.getIsCur() ? 1L: 0L);
  
-        String account = entity.getAccount();
-        if (account != null) {
-            stmt.bindString(2, account);
+        String remark = entity.getRemark();
+        if (remark != null) {
+            stmt.bindString(6, remark);
         }
- 
-        String pwd = entity.getPwd();
-        if (pwd != null) {
-            stmt.bindString(3, pwd);
-        }
-        stmt.bindLong(4, entity.getEmailCategoryId());
- 
-        String emailCategory = entity.getEmailCategory();
-        if (emailCategory != null) {
-            stmt.bindString(5, emailCategory);
-        }
-        stmt.bindLong(6, entity.getEnable() ? 1L: 0L);
-        stmt.bindLong(7, entity.getCustomId());
     }
 
     @Override
@@ -128,12 +108,11 @@ public class AccountDetailDao extends AbstractDao<AccountDetail, Long> {
     public AccountDetail readEntity(Cursor cursor, int offset) {
         AccountDetail entity = new AccountDetail( //
             cursor.getLong(offset + 0), // id
-            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // account
-            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // pwd
-            cursor.getInt(offset + 3), // emailCategoryId
-            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // emailCategory
-            cursor.getShort(offset + 5) != 0, // enable
-            cursor.getLong(offset + 6) // customId
+            cursor.getString(offset + 1), // account
+            cursor.getString(offset + 2), // pwd
+            cursor.getLong(offset + 3), // emailId
+            cursor.getShort(offset + 4) != 0, // isCur
+            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5) // remark
         );
         return entity;
     }
@@ -141,12 +120,11 @@ public class AccountDetailDao extends AbstractDao<AccountDetail, Long> {
     @Override
     public void readEntity(Cursor cursor, AccountDetail entity, int offset) {
         entity.setId(cursor.getLong(offset + 0));
-        entity.setAccount(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setPwd(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
-        entity.setEmailCategoryId(cursor.getInt(offset + 3));
-        entity.setEmailCategory(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
-        entity.setEnable(cursor.getShort(offset + 5) != 0);
-        entity.setCustomId(cursor.getLong(offset + 6));
+        entity.setAccount(cursor.getString(offset + 1));
+        entity.setPwd(cursor.getString(offset + 2));
+        entity.setEmailId(cursor.getLong(offset + 3));
+        entity.setIsCur(cursor.getShort(offset + 4) != 0);
+        entity.setRemark(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
      }
     
     @Override
@@ -181,12 +159,9 @@ public class AccountDetailDao extends AbstractDao<AccountDetail, Long> {
             StringBuilder builder = new StringBuilder("SELECT ");
             SqlUtils.appendColumns(builder, "T", getAllColumns());
             builder.append(',');
-            SqlUtils.appendColumns(builder, "T0", daoSession.getReceiverDao().getAllColumns());
-            builder.append(',');
-            SqlUtils.appendColumns(builder, "T1", daoSession.getSendDao().getAllColumns());
+            SqlUtils.appendColumns(builder, "T0", daoSession.getEmailDao().getAllColumns());
             builder.append(" FROM ACCOUNT_DETAIL T");
-            builder.append(" LEFT JOIN RECEIVER T0 ON T.\"CUSTOM_ID\"=T0.\"_id\"");
-            builder.append(" LEFT JOIN SEND T1 ON T.\"CUSTOM_ID\"=T1.\"_id\"");
+            builder.append(" LEFT JOIN EMAIL T0 ON T.\"EMAIL_ID\"=T0.\"_id\"");
             builder.append(' ');
             selectDeep = builder.toString();
         }
@@ -197,15 +172,9 @@ public class AccountDetailDao extends AbstractDao<AccountDetail, Long> {
         AccountDetail entity = loadCurrent(cursor, 0, lock);
         int offset = getAllColumns().length;
 
-        Receiver receiver = loadCurrentOther(daoSession.getReceiverDao(), cursor, offset);
-         if(receiver != null) {
-            entity.setReceiver(receiver);
-        }
-        offset += daoSession.getReceiverDao().getAllColumns().length;
-
-        Send send = loadCurrentOther(daoSession.getSendDao(), cursor, offset);
-         if(send != null) {
-            entity.setSend(send);
+        Email email = loadCurrentOther(daoSession.getEmailDao(), cursor, offset);
+         if(email != null) {
+            entity.setEmail(email);
         }
 
         return entity;    

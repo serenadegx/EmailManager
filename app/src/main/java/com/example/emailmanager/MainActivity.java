@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SendMsgActivity.start2SendMsgActivity(MainActivity.this);
+                SendMsgActivity.start2SendMsgActivity(MainActivity.this,SendMsgActivity.SEND);
             }
         });
 

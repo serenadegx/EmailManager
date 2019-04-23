@@ -7,6 +7,16 @@ import com.example.emailmanager.data.DaoMaster;
 import com.example.emailmanager.data.DaoSession;
 
 public class EMApplication extends Application {
+    private static String account;
+
+    public static void setAccount(String account) {
+        EMApplication.account = account;
+    }
+
+    public static String getAccount() {
+        return account;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();

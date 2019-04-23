@@ -3,6 +3,7 @@ package com.example.emailmanager.data;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Keep;
+import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.annotation.ToOne;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.DaoException;
@@ -11,22 +12,16 @@ import org.greenrobot.greendao.DaoException;
 public class AccountDetail {
     @Id(autoincrement = true)
     private long id;
+    @NotNull
     private String account;
+    @NotNull
     private String pwd;
-    private int emailCategoryId;
-    private String emailCategory;
-    private boolean enable;
-    private long customId;
-    /**
-     * 接收邮件服务器
-     */
-    @ToOne(joinProperty = "customId")
-    private Receiver receiver;
-    /**
-     * 发送邮件服务器
-     */
-    @ToOne(joinProperty = "customId")
-    private Send send;
+    @NotNull
+    private long emailId;
+    @ToOne(joinProperty = "emailId")
+    private Email email;
+    private boolean isCur;
+    private String remark;
     /**
      * Used to resolve relations
      */
@@ -38,26 +33,39 @@ public class AccountDetail {
     @Generated(hash = 1975204085)
     private transient AccountDetailDao myDao;
 
-    @Generated(hash = 1891738362)
-    public AccountDetail(long id, String account, String pwd, int emailCategoryId,
-            String emailCategory, boolean enable, long customId) {
+    @Generated(hash = 392936856)
+    public AccountDetail(long id, @NotNull String account, @NotNull String pwd, long emailId,
+            boolean isCur, String remark) {
         this.id = id;
         this.account = account;
         this.pwd = pwd;
-        this.emailCategoryId = emailCategoryId;
-        this.emailCategory = emailCategory;
-        this.enable = enable;
-        this.customId = customId;
+        this.emailId = emailId;
+        this.isCur = isCur;
+        this.remark = remark;
     }
 
     @Generated(hash = 200705118)
     public AccountDetail() {
     }
 
-    @Generated(hash = 118553546)
-    private transient Long receiver__resolvedKey;
-    @Generated(hash = 138548586)
-    private transient Long send__resolvedKey;
+    @Generated(hash = 759071072)
+    private transient Long email__resolvedKey;
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setCur(boolean cur) {
+        isCur = cur;
+    }
+
+    public boolean isCur() {
+        return isCur;
+    }
 
     public void setId(long id) {
         this.id = id;
@@ -71,30 +79,13 @@ public class AccountDetail {
         this.pwd = pwd;
     }
 
-    public void setEmailCategoryId(int emailCategoryId) {
-        this.emailCategoryId = emailCategoryId;
-    }
-
-    public void setEmailCategory(String emailCategory) {
-        this.emailCategory = emailCategory;
-    }
-
-    public void setCustomId(long customId) {
-        this.customId = customId;
+    public void setEmailId(long emailId) {
+        this.emailId = emailId;
     }
 
     @Keep
-    public void setReceiver(Receiver receiver) {
-        this.receiver = receiver;
-    }
-
-    @Keep
-    public void setSend(Send send) {
-        this.send = send;
-    }
-
-    public void setEnable(boolean enable) {
-        this.enable = enable;
+    public void setEmail(Email email) {
+        this.email = email;
     }
 
     public long getId() {
@@ -109,30 +100,21 @@ public class AccountDetail {
         return pwd;
     }
 
-    public int getEmailCategoryId() {
-        return emailCategoryId;
-    }
-
-    public String getEmailCategory() {
-        return emailCategory;
-    }
-
-    public long getCustomId() {
-        return customId;
+    public long getEmailId() {
+        return emailId;
     }
 
     @Keep
-    public Receiver getReceiver() {
-        return receiver;
+    public Email getEmail() {
+        return email;
     }
 
-    @Keep
-    public Send getSend() {
-        return send;
+    public boolean getIsCur() {
+        return this.isCur;
     }
 
-    public boolean isEnable() {
-        return enable;
+    public void setIsCur(boolean isCur) {
+        this.isCur = isCur;
     }
 
     /**
@@ -171,16 +153,18 @@ public class AccountDetail {
         myDao.update(this);
     }
 
-    /**
-     * called by internal mechanisms, do not call yourself.
-     */
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setEmailId(Long emailId) {
+        this.emailId = emailId;
+    }
+
+    /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 1905580256)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getAccountDetailDao() : null;
-    }
-
-    public boolean getEnable() {
-        return this.enable;
     }
 }

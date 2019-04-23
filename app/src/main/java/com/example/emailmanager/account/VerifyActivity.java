@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,15 +20,18 @@ import androidx.core.app.NotificationCompat;
 import androidx.databinding.DataBindingUtil;
 
 public class VerifyActivity extends AppCompatActivity {
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    @SuppressLint("WrongConstant")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ActivityVerifyBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_verify);
-        binding.setViewModel(new VerifyModel("imap.qq.com", this));
+        binding.setViewModel(new VerifyModel("imap.qq.com", this, getIntent().getLongExtra("category", 0)));
         //监听新邮件
         Intent intentService = new Intent(this, NewEmailService.class);
         startService(intentService);
+    }
+
+    public static void start2VerifyActivity(Context context, long categoryId) {
+        context.startActivity(new Intent(context, VerifyActivity.class)
+                .putExtra("category", categoryId));
     }
 }

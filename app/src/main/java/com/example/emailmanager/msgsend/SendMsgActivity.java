@@ -94,9 +94,9 @@ public class SendMsgActivity extends AppCompatActivity {
         context.startActivity(new Intent(context, SendMsgActivity.class));
     }
 
-    public static void start2SendMsgActivity(Context context, int msgNum) {
+    public static void start2SendMsgActivity(Context context, int flag) {
         context.startActivity(new Intent(context, SendMsgActivity.class)
-                .putExtra("id", msgNum));
+                .putExtra("flag", flag));
     }
 
     public static void start2SendMsgActivity(Context context, int msgNum, int flag) {

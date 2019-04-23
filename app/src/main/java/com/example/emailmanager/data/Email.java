@@ -1,9 +1,16 @@
 package com.example.emailmanager.data;
 
-import androidx.databinding.Bindable;
+import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Id;
 
-public class Email {
-    private int categoryId;
+import androidx.databinding.BaseObservable;
+import androidx.databinding.Bindable;
+import org.greenrobot.greendao.annotation.Generated;
+
+@Entity
+public class Email extends BaseObservable {
+    @Id
+    private long categoryId;
     private String name;
 
     private String receiveProtocol;
@@ -21,8 +28,58 @@ public class Email {
     private String sendPortValue;
     private String sendEncryptKey;
     private boolean sendEncryptValue;
+    private String authKey;
+    private boolean authValue;
 
-    public void setCategoryId(int categoryId) {
+    @Generated(hash = 1467846344)
+    public Email(long categoryId, String name, String receiveProtocol,
+            String receiveHostKey, String receiveHostValue, String receivePortKey,
+            String receivePortValue, String receiveEncryptKey,
+            boolean receiveEncryptValue, String sendProtocol, String sendHostKey,
+            String sendHostValue, String sendPortKey, String sendPortValue,
+            String sendEncryptKey, boolean sendEncryptValue, String authKey,
+            boolean authValue) {
+        this.categoryId = categoryId;
+        this.name = name;
+        this.receiveProtocol = receiveProtocol;
+        this.receiveHostKey = receiveHostKey;
+        this.receiveHostValue = receiveHostValue;
+        this.receivePortKey = receivePortKey;
+        this.receivePortValue = receivePortValue;
+        this.receiveEncryptKey = receiveEncryptKey;
+        this.receiveEncryptValue = receiveEncryptValue;
+        this.sendProtocol = sendProtocol;
+        this.sendHostKey = sendHostKey;
+        this.sendHostValue = sendHostValue;
+        this.sendPortKey = sendPortKey;
+        this.sendPortValue = sendPortValue;
+        this.sendEncryptKey = sendEncryptKey;
+        this.sendEncryptValue = sendEncryptValue;
+        this.authKey = authKey;
+        this.authValue = authValue;
+    }
+
+    @Generated(hash = 272676561)
+    public Email() {
+    }
+
+    public void setAuthKey(String authKey) {
+        this.authKey = authKey;
+    }
+
+    public void setAuthValue(boolean authValue) {
+        this.authValue = authValue;
+    }
+
+    public String getAuthKey() {
+        return authKey;
+    }
+
+    public boolean isAuthValue() {
+        return authValue;
+    }
+
+    public void setCategoryId(long categoryId) {
         this.categoryId = categoryId;
     }
 
@@ -86,7 +143,7 @@ public class Email {
         this.sendEncryptValue = sendEncryptValue;
     }
 
-    public int getCategoryId() {
+    public long getCategoryId() {
         return categoryId;
     }
 
@@ -149,5 +206,21 @@ public class Email {
 
     public boolean isSendEncryptValue() {
         return sendEncryptValue;
+    }
+
+    public boolean getReceiveEncryptValue() {
+        return this.receiveEncryptValue;
+    }
+
+    public boolean getSendEncryptValue() {
+        return this.sendEncryptValue;
+    }
+
+    public boolean getAuthValue() {
+        return this.authValue;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
 }
