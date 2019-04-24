@@ -12,10 +12,13 @@ import com.example.emailmanager.EMApplication;
 import com.example.emailmanager.R;
 import com.example.emailmanager.data.AccountDetail;
 import com.example.emailmanager.data.AccountDetailDao;
+import com.example.emailmanager.data.Email;
 import com.example.emailmanager.data.EmailDao;
 import com.example.emailmanager.data.source.EmailRepository;
 import com.example.emailmanager.databinding.ActivityEmailDetailBinding;
 import com.example.emailmanager.emaildetail.adapter.AccessoryListAdapter;
+
+import org.greenrobot.greendao.query.QueryBuilder;
 
 import java.util.List;
 
@@ -28,14 +31,6 @@ public class EmailDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        List<AccountDetail> accountDetails = EMApplication.getDaoSession().getAccountDetailDao().queryDeep("where T0." + EmailDao.Properties.CategoryId.columnName + "=?", new String[]{"1"});
-        if (accountDetails != null && accountDetails.size() > 0) {
-            AccountDetail accountDetail = accountDetails.get(0);
-            Log.i("mango", "account:" + accountDetail.getAccount() + "  ReceiveProtocol:"
-                    + accountDetail.getEmail().getReceiveProtocol() + "  ReceiveHost:" + accountDetail.getEmail().getReceiveHostValue());
-            Log.i("mango", "account:" + accountDetail.getAccount() + "  ReceiveProtocol:"
-                    + accountDetail.getEmail().getReceiveProtocol() + "  ReceiveHost:" + accountDetail.getEmail().getReceiveHostValue());
-        }
         ActivityEmailDetailBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_email_detail);
         initToolbar(binding);
         binding.rvAccessory.setLayoutManager(new LinearLayoutManager(this));

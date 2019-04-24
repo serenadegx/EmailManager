@@ -1,6 +1,7 @@
 package com.example.emailmanager.emails.adapter;
 
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.example.emailmanager.BR;
@@ -21,7 +22,7 @@ public class EmailListAdapter extends BaseAdapter<EmailDetail, BaseViewHolder> {
 
     @Override
     public BaseViewHolder onCreateVH(ViewGroup parent, int viewType) {
-        ViewDataBinding dataBinding = DataBindingUtil.inflate(inflater, R.layout.item_email, parent, false);
+        ViewDataBinding dataBinding = DataBindingUtil.inflate(LayoutInflater.from(mContext), R.layout.item_email, parent, false);
         return new BaseViewHolder(dataBinding);
     }
 

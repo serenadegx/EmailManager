@@ -3,18 +3,19 @@ package com.example.emailmanager;
 import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.example.emailmanager.data.AccountDetail;
 import com.example.emailmanager.data.DaoMaster;
 import com.example.emailmanager.data.DaoSession;
 
 public class EMApplication extends Application {
-    private static String account;
+    private static AccountDetail mAccount;
 
-    public static void setAccount(String account) {
-        EMApplication.account = account;
+    public static void setAccount(AccountDetail account) {
+        mAccount = account;
     }
 
-    public static String getAccount() {
-        return account;
+    public static AccountDetail getAccount() {
+        return mAccount;
     }
 
     @Override

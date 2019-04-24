@@ -3,10 +3,15 @@ package com.example.emailmanager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.example.emailmanager.account.EmailCategoryActivity;
 import com.example.emailmanager.data.AccountDetail;
+import com.example.emailmanager.data.AccountDetailDao;
 import com.example.emailmanager.data.Email;
+import com.example.emailmanager.data.EmailDao;
+
+import org.greenrobot.greendao.query.QueryBuilder;
 
 import java.util.List;
 
@@ -27,9 +32,13 @@ public class SplashActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        List<AccountDetail> list = EMApplication.getDaoSession().getAccountDetailDao().queryBuilder().list();
-                        if (list != null && list.size() > 0) {
-                            EMApplication.setAccount(list.get(0).getAccount());
+                        QueryBuilder<AccountDetail> queryBuilder = EMApplication.getDaoSession().getAccountDetailDao().queryBuilder().where(AccountDetailDao.Properties.IsCur.eq("true"));
+                        List<AccountDetail> accounts = queryBuilder.list();
+                        if (accounts != null && accounts.size() > 0) {
+                            AccountDetail accountDetail = accounts.get(0);
+                            Log.i("mango", "account:" + accountDetail.getAccount() + "    isCurrent:" + accountDetail.isCur() + "  ReceiveProtocol:"
+                                    + accountDetail.getEmail().getReceiveProtocol() + "  ReceiveHost:" + accountDetail.getEmail().getReceiveHostValue());
+                            EMApplication.setAccount(accountDetail);
                             MainActivity.start2MainActivity(SplashActivity.this);
                         } else {
                             EmailCategoryActivity.start2EmailCategoryActivity(SplashActivity.this);
@@ -60,7 +69,7 @@ public class SplashActivity extends AppCompatActivity {
                     email1.setReceiveEncryptValue("1".equals(array[7]));
                     email1.setSendProtocol(array[8]);
                     email1.setSendHostKey(array[9]);
-                    email1.setReceiveHostValue(array[10]);
+                    email1.setSendHostValue(array[10]);
                     email1.setSendPortKey(array[11]);
                     email1.setSendPortValue(array[12]);
                     email1.setSendEncryptKey(array[13]);
@@ -81,7 +90,7 @@ public class SplashActivity extends AppCompatActivity {
                     email2.setReceiveEncryptValue("1".equals(array2[7]));
                     email2.setSendProtocol(array2[8]);
                     email2.setSendHostKey(array2[9]);
-                    email2.setReceiveHostValue(array2[10]);
+                    email2.setSendHostValue(array2[10]);
                     email2.setSendPortKey(array2[11]);
                     email2.setSendPortValue(array2[12]);
                     email2.setSendEncryptKey(array2[13]);

@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
+import com.example.emailmanager.account.EmailCategoryActivity;
 import com.example.emailmanager.emails.InboxFragment;
 import com.example.emailmanager.msgsend.SendMsgActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -25,6 +27,8 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        View headerView = navigationView.getHeaderView(0);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -32,7 +36,16 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SendMsgActivity.start2SendMsgActivity(MainActivity.this,SendMsgActivity.SEND);
+                SendMsgActivity.start2SendMsgActivity(MainActivity.this, SendMsgActivity.SEND);
+            }
+        });
+
+        ((TextView) headerView.findViewById(R.id.textView)).setText(EMApplication.getAccount().getAccount());
+        headerView.findViewById(R.id.tv_switch).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EmailCategoryActivity.start2EmailCategoryActivity(MainActivity.this);
+                finish();
             }
         });
 
@@ -42,7 +55,6 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         Bundle bundle = new Bundle();
         InboxFragment inboxFragment = new InboxFragment();

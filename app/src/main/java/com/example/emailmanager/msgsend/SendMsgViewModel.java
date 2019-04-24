@@ -9,6 +9,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.emailmanager.EMApplication;
 import com.example.emailmanager.data.AccessoryDetail;
 import com.example.emailmanager.data.EmailDetail;
 import com.example.emailmanager.data.source.EmailDataSource;
@@ -97,7 +98,7 @@ public class SendMsgViewModel {
         new Thread() {
             @Override
             public void run() {
-                mEmailRepository.sendMsg(data, new EmailDataSource.GetResultCallBack() {
+                mEmailRepository.sendMsg(EMApplication.getAccount(), data, new EmailDataSource.GetResultCallBack() {
                     @Override
                     public void onSuccess() {
                         mHandler.sendEmptyMessage(SUCCESS);
@@ -130,7 +131,7 @@ public class SendMsgViewModel {
         new Thread() {
             @Override
             public void run() {
-                mEmailRepository.save2Draft(data, new EmailDataSource.GetResultCallBack() {
+                mEmailRepository.save2Draft(EMApplication.getAccount(), data, new EmailDataSource.GetResultCallBack() {
                     @Override
                     public void onSuccess() {
                         mHandler.sendEmptyMessage(SAVE_SUCCESS);
@@ -162,7 +163,7 @@ public class SendMsgViewModel {
         new Thread() {
             @Override
             public void run() {
-                mEmailRepository.forward(msgNum, data, new EmailDataSource.GetResultCallBack() {
+                mEmailRepository.forward(EMApplication.getAccount(), msgNum, data, new EmailDataSource.GetResultCallBack() {
                     @Override
                     public void onSuccess() {
                         mHandler.sendEmptyMessage(FORWARD_SUCCESS);
@@ -194,7 +195,7 @@ public class SendMsgViewModel {
         new Thread() {
             @Override
             public void run() {
-                mEmailRepository.reply(msgNum, data, new EmailDataSource.GetResultCallBack() {
+                mEmailRepository.reply(EMApplication.getAccount(), msgNum, data, new EmailDataSource.GetResultCallBack() {
                     @Override
                     public void onSuccess() {
                         mHandler.sendEmptyMessage(REPLY_SUCCESS);

@@ -35,7 +35,7 @@ public class AccountDetail {
 
     @Generated(hash = 392936856)
     public AccountDetail(long id, @NotNull String account, @NotNull String pwd, long emailId,
-            boolean isCur, String remark) {
+                         boolean isCur, String remark) {
         this.id = id;
         this.account = account;
         this.pwd = pwd;
@@ -83,9 +83,18 @@ public class AccountDetail {
         this.emailId = emailId;
     }
 
-    @Keep
-    public void setEmail(Email email) {
-        this.email = email;
+    /** called by internal mechanisms, do not call yourself. */
+    @Generated(hash = 802409629)
+    public void setEmail(@NotNull Email email) {
+        if (email == null) {
+            throw new DaoException(
+                    "To-one property 'emailId' has not-null constraint; cannot set to-one to null");
+        }
+        synchronized (this) {
+            this.email = email;
+            emailId = email.getCategoryId();
+            email__resolvedKey = emailId;
+        }
     }
 
     public long getId() {
@@ -104,8 +113,22 @@ public class AccountDetail {
         return emailId;
     }
 
-    @Keep
+    /** To-one relationship, resolved on first access. */
+    @Generated(hash = 590375714)
     public Email getEmail() {
+        long __key = this.emailId;
+        if (email__resolvedKey == null || !email__resolvedKey.equals(__key)) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            EmailDao targetDao = daoSession.getEmailDao();
+            Email emailNew = targetDao.load(__key);
+            synchronized (this) {
+                email = emailNew;
+                email__resolvedKey = __key;
+            }
+        }
         return email;
     }
 
@@ -161,7 +184,9 @@ public class AccountDetail {
         this.emailId = emailId;
     }
 
-    /** called by internal mechanisms, do not call yourself. */
+    /**
+     * called by internal mechanisms, do not call yourself.
+     */
     @Generated(hash = 1905580256)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;

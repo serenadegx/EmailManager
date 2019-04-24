@@ -40,6 +40,7 @@
             android:layout_marginStart="10dp"
             android:maxLength="16"
             android:text="@{item.fileName}"
+            android:textSize="12sp"
             app:layout_constraintLeft_toRightOf="@id/iv_file"
             app:layout_constraintTop_toTopOf="@id/iv_file" />
 
@@ -49,6 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:text="@{item.size}"
+            android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="@id/iv_file"
             app:layout_constraintLeft_toRightOf="@id/iv_file" />
 
@@ -56,9 +58,11 @@
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_marginRight="10dp"
             android:onClick="@{() -> adapter.downloadOrOpen(item,position)}"
             android:text="@{item.isDownload ? @string/bt_open : @string/bt_download}"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

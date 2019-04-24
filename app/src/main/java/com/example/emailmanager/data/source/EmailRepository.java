@@ -52,37 +52,28 @@ public class EmailRepository {
      *
      * @param callBack
      */
-    public void loadData(EmailDataSource.GetEmailsCallBack callBack) {
-//        QueryBuilder<AccountDetail> queryBuilder = EMApplication.getDaoSession().getAccountDetailDao().queryBuilder();
-//        Join accountJoin = queryBuilder.join(AccountDetailDao.Properties.CustomId, AccountDetail.class);
-//        queryBuilder.join(accountJoin, SendDao.Properties.Id, Send.class, ReceiverDao.Properties.Id);
-//        List<AccountDetail> accounts = queryBuilder.where(AccountDetailDao.Properties.Enable.eq(true)).list();
-//        Log.i("mango", "loading:");
-//        if (accounts != null && accounts.size() > 0) {
-//            //远程数据
-//        }
-        remoteData(new AccountDetail(), callBack);
+    public void loadData(AccountDetail data, EmailDataSource.GetEmailsCallBack callBack) {
+        remoteData(data, callBack);
     }
 
-    private void remoteData(final AccountDetail accountDetail, EmailDataSource.GetEmailsCallBack callBack) {
+    private void remoteData(final AccountDetail detail, EmailDataSource.GetEmailsCallBack callBack) {
         List<EmailDetail> data = new ArrayList<>();
         Properties props = System.getProperties();
-        props.put("mail.imap.host", "imap.qq.com");
-        props.put("mail.imap.port", "993");
-        props.put("mail.imap.ssl.enable", true);
+        props.put(detail.getEmail().getReceiveHostKey(), detail.getEmail().getReceiveHostValue());
+        props.put(detail.getEmail().getReceivePortKey(), detail.getEmail().getReceivePortValue());
+        props.put(detail.getEmail().getReceiveEncryptKey(), detail.getEmail().getReceiveEncryptValue());
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(
-                        "1099805713@qq.com", "pfujejqwrezxgbjj");
+                        detail.getAccount(), detail.getPwd());
             }
         });
 //        session.setDebug(true);
         Store store = null;
         Folder inbox = null;
         try {
-//            store = session.getStore(accountDetail.getReceiver().getProtocol());
-            store = session.getStore("imap");
+            store = session.getStore(detail.getEmail().getReceiveProtocol());
             store.connect();
             inbox = store.getFolder("INBOX");
             inbox.open(Folder.READ_ONLY);
@@ -121,25 +112,24 @@ public class EmailRepository {
      *
      * @param callBack
      */
-    public void loadSentMessage(EmailDataSource.GetEmailsCallBack callBack) {
+    public void loadSentMessage(final AccountDetail detail, EmailDataSource.GetEmailsCallBack callBack) {
         List<EmailDetail> data = new ArrayList<>();
         Properties props = System.getProperties();
-        props.put("mail.imap.host", "imap.qq.com");
-        props.put("mail.imap.port", "993");
-        props.put("mail.imap.ssl.enable", true);
+        props.put(detail.getEmail().getReceiveHostKey(), detail.getEmail().getReceiveHostValue());
+        props.put(detail.getEmail().getReceivePortKey(), detail.getEmail().getReceivePortValue());
+        props.put(detail.getEmail().getReceiveEncryptKey(), detail.getEmail().getReceiveEncryptValue());
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(
-                        "1099805713@qq.com", "pfujejqwrezxgbjj");
+                        detail.getAccount(), detail.getPwd());
             }
         });
 //        session.setDebug(true);
         Store store = null;
         Folder inbox = null;
         try {
-//            store = session.getStore(accountDetail.getReceiver().getProtocol());
-            store = session.getStore("imap");
+            store = session.getStore(detail.getEmail().getReceiveProtocol());
             store.connect();
             inbox = store.getFolder("Sent Messages");
             inbox.open(Folder.READ_ONLY);
@@ -179,27 +169,27 @@ public class EmailRepository {
 
     /**
      * 获取草稿箱
+     *
      * @param callBack
      */
-    public void loadDrafts(EmailDataSource.GetEmailsCallBack callBack){
+    public void loadDrafts(final AccountDetail detail, EmailDataSource.GetEmailsCallBack callBack) {
         List<EmailDetail> data = new ArrayList<>();
         Properties props = System.getProperties();
-        props.put("mail.imap.host", "imap.qq.com");
-        props.put("mail.imap.port", "993");
-        props.put("mail.imap.ssl.enable", true);
+        props.put(detail.getEmail().getReceiveHostKey(), detail.getEmail().getReceiveHostValue());
+        props.put(detail.getEmail().getReceivePortKey(), detail.getEmail().getReceivePortValue());
+        props.put(detail.getEmail().getReceiveEncryptKey(), detail.getEmail().getReceiveEncryptValue());
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(
-                        "1099805713@qq.com", "pfujejqwrezxgbjj");
+                        detail.getAccount(), detail.getPwd());
             }
         });
 //        session.setDebug(true);
         Store store = null;
         Folder inbox = null;
         try {
-//            store = session.getStore(accountDetail.getReceiver().getProtocol());
-            store = session.getStore("imap");
+            store = session.getStore(detail.getEmail().getReceiveProtocol());
             store.connect();
             inbox = store.getFolder("Drafts");
             inbox.open(Folder.READ_ONLY);
@@ -237,7 +227,8 @@ public class EmailRepository {
         }
     }
 
-    public void loadDeleted(){}
+    public void loadDeleted() {
+    }
 
     /**
      * 根据id查询邮件
@@ -245,24 +236,24 @@ public class EmailRepository {
      * @param msgNum
      * @return
      */
-    public EmailDetail loadRemoteDataById(int msgNum) {
+    public EmailDetail loadRemoteDataById(final AccountDetail detail, int msgNum) {
         EmailDetail data = null;
         Properties props = System.getProperties();
-        props.put("mail.imap.host", "imap.qq.com");
-        props.put("mail.imap.port", "993");
-        props.put("mail.imap.ssl.enable", true);
+        props.put(detail.getEmail().getReceiveHostKey(), detail.getEmail().getReceiveHostValue());
+        props.put(detail.getEmail().getReceivePortKey(), detail.getEmail().getReceivePortValue());
+        props.put(detail.getEmail().getReceiveEncryptKey(), detail.getEmail().getReceiveEncryptValue());
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(
-                        "1099805713@qq.com", "pfujejqwrezxgbjj");
+                        detail.getAccount(), detail.getPwd());
             }
         });
 //        session.setDebug(true);
         Store store = null;
         Folder inbox = null;
         try {
-            store = session.getStore("imap");
+            store = session.getStore(detail.getEmail().getReceiveProtocol());
             store.connect();
             inbox = store.getFolder("INBOX");
             inbox.open(Folder.READ_ONLY);
@@ -303,17 +294,17 @@ public class EmailRepository {
      * @param data
      * @param callBack
      */
-    public void sendMsg(EmailDetail data, EmailDataSource.GetResultCallBack callBack) {
+    public void sendMsg(final AccountDetail detail, EmailDetail data, EmailDataSource.GetResultCallBack callBack) {
         Properties props = System.getProperties();
-        props.put("mail.smtp.host", "smtp.qq.com");
-        props.put("mail.smtp.port", "465");
-        props.put("mail.smtp.ssl.enable", true);
-        props.put("mail.smtp.auth", true);
+        props.put(detail.getEmail().getSendHostKey(), detail.getEmail().getSendHostValue());
+        props.put(detail.getEmail().getSendPortKey(), detail.getEmail().getSendPortValue());
+        props.put(detail.getEmail().getSendEncryptKey(), detail.getEmail().getSendEncryptValue());
+        props.put(detail.getEmail().getAuthKey(), detail.getEmail().getAuthValue());
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(
-                        "1099805713@qq.com", "pfujejqwrezxgbjj");
+                        detail.getAccount(), detail.getPwd());
             }
         });
         SMTPTransport t = null;
@@ -345,15 +336,15 @@ public class EmailRepository {
             mbp1.setText(data.getContent());
             mp.addBodyPart(mbp1);
             if (data.getAccessoryList() != null && data.getAccessoryList().size() > 0) {
-                for (AccessoryDetail detail : data.getAccessoryList()) {
+                for (AccessoryDetail detail1 : data.getAccessoryList()) {
                     MimeBodyPart mbp2 = new MimeBodyPart();
-                    mbp2.attachFile(detail.getFileName());
+                    mbp2.attachFile(detail1.getFileName());
                     mp.addBodyPart(mbp2);
                 }
             }
             msg.setContent(mp);
             msg.setSentDate(new Date());
-            t = (SMTPTransport) session.getTransport("smtp");
+            t = (SMTPTransport) session.getTransport(detail.getEmail().getSendProtocol());
             t.connect();
             t.sendMessage(msg, msg.getAllRecipients());
             callBack.onSuccess();
@@ -382,17 +373,17 @@ public class EmailRepository {
      * @param data
      * @param callBack
      */
-    public void save2Draft(EmailDetail data, EmailDataSource.GetResultCallBack callBack) {
+    public void save2Draft(final AccountDetail detail, EmailDetail data, EmailDataSource.GetResultCallBack callBack) {
         Properties props = System.getProperties();
-        props.put("mail.smtp.host", "smtp.qq.com");
-        props.put("mail.smtp.port", "465");
-        props.put("mail.smtp.ssl.enable", true);
-        props.put("mail.smtp.auth", true);
+        props.put(detail.getEmail().getSendHostKey(), detail.getEmail().getSendHostValue());
+        props.put(detail.getEmail().getSendPortKey(), detail.getEmail().getSendPortValue());
+        props.put(detail.getEmail().getSendEncryptKey(), detail.getEmail().getSendEncryptValue());
+        props.put(detail.getEmail().getAuthKey(), detail.getEmail().getAuthValue());
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(
-                        "1099805713@qq.com", "pfujejqwrezxgbjj");
+                        detail.getAccount(), detail.getPwd());
             }
         });
         MimeMessage msg = new MimeMessage(session);
@@ -400,7 +391,7 @@ public class EmailRepository {
         Store store = null;
         try {
             //打开草稿箱
-            store = session.getStore("imap");
+            store = session.getStore(detail.getEmail().getReceiveProtocol());
             store.connect();
             drafts = store.getFolder("Drafts");
 
@@ -425,9 +416,9 @@ public class EmailRepository {
             mbp1.setText(data.getContent());
             mp.addBodyPart(mbp1);
             if (data.getAccessoryList() != null && data.getAccessoryList().size() > 0) {
-                for (AccessoryDetail detail : data.getAccessoryList()) {
+                for (AccessoryDetail detail1 : data.getAccessoryList()) {
                     MimeBodyPart mbp2 = new MimeBodyPart();
-                    mbp2.attachFile(detail.getFileName());
+                    mbp2.attachFile(detail1.getFileName());
                     mp.addBodyPart(mbp2);
                 }
             }
@@ -464,23 +455,23 @@ public class EmailRepository {
      * @param msgNum
      * @param callBack
      */
-    public void deleteById(int msgNum, EmailDataSource.GetResultCallBack callBack) {
+    public void deleteById(final AccountDetail detail, int msgNum, EmailDataSource.GetResultCallBack callBack) {
         Properties props = System.getProperties();
-        props.put("mail.imap.host", "imap.qq.com");
-        props.put("mail.imap.port", "993");
-        props.put("mail.imap.ssl.enable", true);
+        props.put(detail.getEmail().getReceiveHostKey(), detail.getEmail().getReceiveHostValue());
+        props.put(detail.getEmail().getReceivePortKey(), detail.getEmail().getReceivePortValue());
+        props.put(detail.getEmail().getReceiveEncryptKey(), detail.getEmail().getReceiveEncryptValue());
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(
-                        "1099805713@qq.com", "pfujejqwrezxgbjj");
+                        detail.getAccount(), detail.getPwd());
             }
         });
 //        session.setDebug(true);
         Store store = null;
         Folder inbox = null;
         try {
-            store = session.getStore("imap");
+            store = session.getStore(detail.getEmail().getReceiveProtocol());
             store.connect();
             inbox = store.getFolder("INBOX");
             inbox.open(Folder.READ_WRITE);
@@ -509,16 +500,16 @@ public class EmailRepository {
      * @param isRead
      * @param callBack
      */
-    public void changeSeenFlag(int msgNum, boolean isRead, EmailDataSource.GetResultCallBack callBack) {
+    public void changeSeenFlag(final AccountDetail detail, int msgNum, boolean isRead, EmailDataSource.GetResultCallBack callBack) {
         Properties props = System.getProperties();
-        props.put("mail.imap.host", "imap.qq.com");
-        props.put("mail.imap.port", "993");
-        props.put("mail.imap.ssl.enable", true);
+        props.put(detail.getEmail().getReceiveHostKey(), detail.getEmail().getReceiveHostValue());
+        props.put(detail.getEmail().getReceivePortKey(), detail.getEmail().getReceivePortValue());
+        props.put(detail.getEmail().getReceiveEncryptKey(), detail.getEmail().getReceiveEncryptValue());
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(
-                        "1099805713@qq.com", "pfujejqwrezxgbjj");
+                        detail.getAccount(), detail.getPwd());
             }
         });
 //        session.setDebug(true);
@@ -554,24 +545,24 @@ public class EmailRepository {
      * @param msgNum
      * @param data
      */
-    public void forward(int msgNum, EmailDetail data, EmailDataSource.GetResultCallBack callBack) {
+    public void forward(final AccountDetail detail, int msgNum, EmailDetail data, EmailDataSource.GetResultCallBack callBack) {
         Properties props = System.getProperties();
-        props.put("mail.smtp.host", "smtp.qq.com");
-        props.put("mail.smtp.port", "465");
-        props.put("mail.smtp.ssl.enable", true);
-        props.put("mail.smtp.auth", true);
+        props.put(detail.getEmail().getSendHostKey(), detail.getEmail().getSendHostValue());
+        props.put(detail.getEmail().getSendPortKey(), detail.getEmail().getSendPortValue());
+        props.put(detail.getEmail().getSendEncryptKey(), detail.getEmail().getSendEncryptValue());
+        props.put(detail.getEmail().getAuthKey(), detail.getEmail().getAuthValue());
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(
-                        "1099805713@qq.com", "pfujejqwrezxgbjj");
+                        detail.getAccount(), detail.getPwd());
             }
         });
         Folder folder = null;
         Store store = null;
         SMTPTransport t = null;
         try {
-            store = session.getStore("imap");
+            store = session.getStore(detail.getEmail().getReceiveProtocol());
             store.connect();
             folder = store.getFolder("inbox");
             folder.open(Folder.READ_ONLY);
@@ -599,16 +590,16 @@ public class EmailRepository {
             mbp1.setDataHandler(collect(data, message));
             mp.addBodyPart(mbp1);
             if (data.getAccessoryList() != null && data.getAccessoryList().size() > 0) {
-                for (AccessoryDetail detail : data.getAccessoryList()) {
+                for (AccessoryDetail detail1 : data.getAccessoryList()) {
                     MimeBodyPart mbp2 = new MimeBodyPart();
-                    mbp2.attachFile(detail.getFileName());
+                    mbp2.attachFile(detail1.getFileName());
                     mp.addBodyPart(mbp2);
                 }
             }
             forward.setContent(mp);
             forward.saveChanges();
             forward.setSentDate(new Date());
-            t = (SMTPTransport) session.getTransport("smtp");
+            t = (SMTPTransport) session.getTransport(detail.getEmail().getSendProtocol());
             t.connect();
             t.sendMessage(forward, forward.getAllRecipients());
             callBack.onSuccess();
@@ -640,8 +631,8 @@ public class EmailRepository {
      * @param data
      * @param callBack
      */
-    public void reply(int msgNum, EmailDetail data, EmailDataSource.GetResultCallBack callBack) {
-        forward(msgNum, data, callBack);
+    public void reply(AccountDetail detail, int msgNum, EmailDetail data, EmailDataSource.GetResultCallBack callBack) {
+        forward(detail, msgNum, data, callBack);
     }
 
     public static String dateFormat(Date date) {
@@ -669,13 +660,13 @@ public class EmailRepository {
                     data.getAccessoryList().add(new AccessoryDetail(MimeUtility.decodeText(filename), "", getPrintSize(p.getSize()), false));
                     Log.i("mango", "FILENAME: " + MimeUtility.decodeText(filename));
                 }
-                Log.i("mango", "未知类型邮件InputStream");
+//                Log.i("mango", "未知类型邮件InputStream");
             } else if (o instanceof String) {
                 data.setContent((String) o);
                 content = (String) o;
-                Log.i("mango", "未知类型邮件string");
+//                Log.i("mango", "未知类型邮件string");
             } else {
-                Log.i("mango", "未知类型邮件");
+//                Log.i("mango", "未知类型邮件");
             }
         }
     }

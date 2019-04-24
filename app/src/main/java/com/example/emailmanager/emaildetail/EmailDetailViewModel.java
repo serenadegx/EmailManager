@@ -10,6 +10,7 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import com.example.emailmanager.EMApplication;
 import com.example.emailmanager.data.EmailDetail;
 import com.example.emailmanager.data.source.EmailDataSource;
 import com.example.emailmanager.data.source.EmailRepository;
@@ -74,7 +75,7 @@ public class EmailDetailViewModel {
         new Thread() {
             @Override
             public void run() {
-                EmailDetail emailDetail = mEmailRepository.loadRemoteDataById(msgNum);
+                EmailDetail emailDetail = mEmailRepository.loadRemoteDataById(EMApplication.getAccount(), msgNum);
                 Message message = Message.obtain();
                 message.what = SUCCESS;
                 message.obj = emailDetail;
@@ -127,7 +128,7 @@ public class EmailDetailViewModel {
         new Thread() {
             @Override
             public void run() {
-                mEmailRepository.deleteById(msgNum, new EmailDataSource.GetResultCallBack() {
+                mEmailRepository.deleteById(EMApplication.getAccount(), msgNum, new EmailDataSource.GetResultCallBack() {
                     @Override
                     public void onSuccess() {
                         mHandler.sendEmptyMessage(DELETE_SUCCESS);

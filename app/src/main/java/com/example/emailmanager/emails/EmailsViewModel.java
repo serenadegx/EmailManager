@@ -5,20 +5,22 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
+import com.example.emailmanager.EMApplication;
 import com.example.emailmanager.data.EmailDetail;
 import com.example.emailmanager.data.source.EmailDataSource;
 import com.example.emailmanager.data.source.EmailRepository;
 import com.example.emailmanager.emails.adapter.EmailListAdapter;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class EmailsViewModel {
     private static final int SUCCESS = 1;
     private static final int ERROR = 2;
     private final EmailRepository mEmailRepository;
     private final Context mContext;
-    private List<EmailDetail> mData = new ArrayList<>();
+    private final SwipeRefreshLayout srl;
     private EmailListAdapter adapter;
     private Handler mHandler = new Handler() {
         @Override
@@ -29,25 +31,28 @@ public class EmailsViewModel {
             } else {
                 Toast.makeText(mContext, "获取失败", Toast.LENGTH_SHORT).show();
             }
+            if (srl.isRefreshing())
+                srl.setRefreshing(false);
         }
     };
 
-    public EmailsViewModel(EmailRepository mEmailRepository, Context context) {
+    public EmailsViewModel(EmailRepository mEmailRepository, Context context, SwipeRefreshLayout srl) {
         this.mEmailRepository = mEmailRepository;
         this.mContext = context;
+        this.srl = srl;
     }
 
 
+    public void setAdapter(EmailListAdapter listAdapter) {
+        this.adapter = listAdapter;
+    }
+
     public void loadEmails() {
-//        for (int i = 0; i < 10; i++) {
-//            EmailDetail emailDetail = new EmailDetail(0, "主题", "19:30", "1099805713@163.com");
-//            mData.add(emailDetail);
-//        }
-//        adapter.refreshData(mData);
+        showLoading();
         new Thread() {
             @Override
             public void run() {
-                mEmailRepository.loadData(new EmailDataSource.GetEmailsCallBack() {
+                mEmailRepository.loadData(EMApplication.getAccount(), new EmailDataSource.GetEmailsCallBack() {
                     @Override
                     public void onEmailsLoaded(List<EmailDetail> emails) {
 
@@ -67,15 +72,12 @@ public class EmailsViewModel {
 
     }
 
-    public void setAdapter(EmailListAdapter listAdapter) {
-        this.adapter = listAdapter;
-    }
-
     public void loadEmailsFromSent() {
+        showLoading();
         new Thread() {
             @Override
             public void run() {
-                mEmailRepository.loadSentMessage(new EmailDataSource.GetEmailsCallBack() {
+                mEmailRepository.loadSentMessage(EMApplication.getAccount(), new EmailDataSource.GetEmailsCallBack() {
                     @Override
                     public void onEmailsLoaded(List<EmailDetail> emails) {
 
@@ -95,10 +97,11 @@ public class EmailsViewModel {
     }
 
     public void loadEmailsFromDraft() {
+        showLoading();
         new Thread() {
             @Override
             public void run() {
-                mEmailRepository.loadDrafts(new EmailDataSource.GetEmailsCallBack() {
+                mEmailRepository.loadDrafts(EMApplication.getAccount(), new EmailDataSource.GetEmailsCallBack() {
                     @Override
                     public void onEmailsLoaded(List<EmailDetail> emails) {
 
@@ -119,5 +122,11 @@ public class EmailsViewModel {
 
     public void loadEmailsFromDelete() {
 
+    }
+
+    private void showLoading() {
+        if (!srl.isRefreshing()) {
+            srl.setRefreshing(true);
+        }
     }
 }
