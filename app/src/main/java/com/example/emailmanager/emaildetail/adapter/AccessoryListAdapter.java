@@ -34,6 +34,8 @@ public class AccessoryListAdapter extends BaseAdapter<AccessoryDetail, BaseViewH
     }
 
     public void downloadOrOpen(AccessoryDetail item, int position) {
+        if (!item.isDownload()) {
 
+        }
     }
 }

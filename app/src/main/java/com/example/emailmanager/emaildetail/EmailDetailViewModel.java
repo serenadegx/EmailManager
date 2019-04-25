@@ -37,10 +37,8 @@ public class EmailDetailViewModel {
     public final ObservableField<String> accessory = new ObservableField<>();
     public final ObservableBoolean isAttach = new ObservableBoolean();
     private final int msgNum;
-
     private Context mContext;
     private EmailRepository mEmailRepository;
-
     private AccessoryListAdapter adapter;
     private WebView webview;
     private Handler mHandler = new Handler() {
@@ -55,6 +53,7 @@ public class EmailDetailViewModel {
                 isAttach.set(emailDetail.getAccessoryList().size() > 0);
                 accessory.set(emailDetail.getAccessoryList().size() + "个附件");
                 adapter.refreshData(emailDetail.getAccessoryList());
+
                 XRWebView.with(webview).simple().build().loadHtml(emailDetail.getContent(), "text/html", "utf-8");
             } else if (msg.what == DELETE_SUCCESS) {
                 Toast.makeText(mContext, "删除成功", Toast.LENGTH_SHORT).show();

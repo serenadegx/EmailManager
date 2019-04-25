@@ -22,6 +22,7 @@ import org.greenrobot.greendao.query.QueryBuilder;
 
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
@@ -37,13 +38,15 @@ public class EmailDetailActivity extends AppCompatActivity {
         AccessoryListAdapter listAdapter = new AccessoryListAdapter(this);
         binding.rvAccessory.setAdapter(listAdapter);
         EmailDetailViewModel viewModel = new EmailDetailViewModel(this, new EmailRepository(), getIntent().getIntExtra("msgnum", 0));
-        viewModel.setAdapter(listAdapter);
-        WebView webView = new WebView(this);
-        binding.flCon.addView(webView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT));
         binding.setViewModel(viewModel);
-        viewModel.setWebView(webView);
+        viewModel.setAdapter(listAdapter);
+        viewModel.setWebView(binding.webView);
         viewModel.loadDataById();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     private void initToolbar(ActivityEmailDetailBinding binding) {

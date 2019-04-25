@@ -99,8 +99,10 @@ public class EmailRepository {
             e.printStackTrace();
         } finally {
             try {
-                inbox.close();
-                store.close();
+                if (inbox != null)
+                    inbox.close();
+                if (store != null)
+                    store.close();
             } catch (MessagingException e) {
                 e.printStackTrace();
             }
@@ -279,8 +281,10 @@ public class EmailRepository {
             e.printStackTrace();
         } finally {
             try {
-                inbox.close();
-                store.close();
+                if (inbox != null)
+                    inbox.close();
+                if (store != null)
+                    store.close();
             } catch (MessagingException e) {
                 e.printStackTrace();
             }

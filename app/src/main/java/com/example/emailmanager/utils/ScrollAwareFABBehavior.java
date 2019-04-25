@@ -27,10 +27,8 @@ public class ScrollAwareFABBehavior extends FloatingActionButton.Behavior {
     public void onNestedScroll(CoordinatorLayout coordinatorLayout, FloatingActionButton child, View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
         super.onNestedScroll(coordinatorLayout, child, target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed);
         if (dyConsumed > 0) {
-            Log.i("Mango", "向上滑动");
             animateOut(child);
         } else if (dyConsumed < 0) {
-            Log.i("Mango", "向下滑动");
             animateIn(child);
         }
     }
