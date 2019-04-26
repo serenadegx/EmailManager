@@ -29,6 +29,10 @@ import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 public class EmailDetailActivity extends AppCompatActivity {
+    public static final int REQUEST_PERMISSIONS = 1;
+
+    private EmailDetailViewModel viewModel;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,7 +41,7 @@ public class EmailDetailActivity extends AppCompatActivity {
         binding.rvAccessory.setLayoutManager(new LinearLayoutManager(this));
         AccessoryListAdapter listAdapter = new AccessoryListAdapter(this);
         binding.rvAccessory.setAdapter(listAdapter);
-        EmailDetailViewModel viewModel = new EmailDetailViewModel(this, new EmailRepository(), getIntent().getIntExtra("msgnum", 0));
+        viewModel = new EmailDetailViewModel(this, new EmailRepository(), getIntent().getIntExtra("msgnum", 0));
         binding.setViewModel(viewModel);
         viewModel.setAdapter(listAdapter);
         viewModel.setWebView(binding.webView);
@@ -46,7 +50,7 @@ public class EmailDetailActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        viewModel.handleRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     private void initToolbar(ActivityEmailDetailBinding binding) {
