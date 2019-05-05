@@ -2,10 +2,13 @@ package com.example.emailmanager.msgsend;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -15,8 +18,16 @@ import com.example.emailmanager.data.EmailDetail;
 import com.example.emailmanager.data.source.EmailDataSource;
 import com.example.emailmanager.data.source.EmailRepository;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.activation.DataHandler;
+import javax.mail.Address;
+import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.util.ByteArrayDataSource;
 
 import androidx.databinding.ObservableField;
 
@@ -38,7 +49,7 @@ public class SendMsgViewModel {
     public final ObservableField<String> content = new ObservableField<>();
     private final Context mContext;
     private final EmailRepository mEmailRepository;
-    private final int msgNum;
+    private final EmailDetail mDetail;
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -65,12 +76,24 @@ public class SendMsgViewModel {
         }
     };
 
-    public SendMsgViewModel(Context mContext, EmailRepository mEmailRepository, int msgNum) {
+    public SendMsgViewModel(Context mContext, EmailRepository mEmailRepository, EmailDetail detail) {
         this.mContext = mContext;
         this.mEmailRepository = mEmailRepository;
-        this.msgNum = msgNum;
-        receiver.set("guoxinrui_qd@caxins.com");
-        send.set("1099805713@qq.com");
+        this.mDetail = detail;
+        send.set(EMApplication.getAccount().getAccount());
+        int flag = ((Activity) mContext).getIntent().getIntExtra("flag", -1);
+        if (flag == SendMsgActivity.SEND) {
+            subject.set("");
+        } else if (flag == SendMsgActivity.FORWARD) {
+            subject.set("转发:" + detail.getSubject());
+        } else if (flag == SendMsgActivity.REPLY) {
+            receiver.set(detail.getFrom());
+            subject.set("回复:" + detail.getSubject());
+        } else if (flag == SendMsgActivity.REPLY_ALL) {
+            receiver.set(detail.getFrom());
+            subject.set("回复:" + detail.getSubject());
+        }
+
     }
 
 
@@ -163,7 +186,7 @@ public class SendMsgViewModel {
         new Thread() {
             @Override
             public void run() {
-                mEmailRepository.forward(EMApplication.getAccount(), msgNum, data, new EmailDataSource.GetResultCallBack() {
+                mEmailRepository.forward(EMApplication.getAccount(), mDetail.getId(), data, new EmailDataSource.GetResultCallBack() {
                     @Override
                     public void onSuccess() {
                         mHandler.sendEmptyMessage(FORWARD_SUCCESS);
@@ -195,7 +218,7 @@ public class SendMsgViewModel {
         new Thread() {
             @Override
             public void run() {
-                mEmailRepository.reply(EMApplication.getAccount(), msgNum, data, new EmailDataSource.GetResultCallBack() {
+                mEmailRepository.reply(EMApplication.getAccount(), mDetail.getId(), data, new EmailDataSource.GetResultCallBack() {
                     @Override
                     public void onSuccess() {
                         mHandler.sendEmptyMessage(REPLY_SUCCESS);
@@ -215,5 +238,44 @@ public class SendMsgViewModel {
 
     public void replyAll() {
         reply();
+    }
+
+    public String collect(EmailDetail data) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(data.getContent() + "<br>");
+        sb.append("<div style=\"line-height:1.5\"><br><br>-------- 原始邮件 --------<br>");
+        sb.append("主题：" + data.getSubject() + "<br>");
+        sb.append("发件人：" + data.getFrom() + "<br>");
+
+        if (data.getTo() != null) {
+            sb.append("收件人：");
+            sb.append(data.getTo() + ";");
+            sb.append("<br>");
+        }
+
+        if (data.getCc() != null) {
+            sb.append("抄送：");
+            sb.append(data.getCc() + ";");
+            sb.append("<br>");
+        }
+
+        if (data.getBcc() != null) {
+            sb.append("密送：");
+            sb.append(data.getBcc() + ";");
+            sb.append("<br>");
+        }
+        sb.append("发件时间：" + data.getDate() + "<br>");
+        sb.append("</div><br>");
+        sb.append(content);
+        return sb.toString();
+    }
+
+    void handleOnActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            Uri uri = data.getData();
+            String path = uri.getPath();
+            Log.i("mango", "path:" + path);
+
+        }
     }
 }

@@ -63,7 +63,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:visibility="@{viewModel.isCc ? View.VISIBLE : View.GONE}">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -73,10 +74,32 @@
                         android:textColor="@android:color/black" />
 
                     <TextView
+                        android:id="@+id/tv_bcc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@{viewModel.cc}"
+                        android:textColor="@android:color/black" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:visibility="@{viewModel.isBcc ? View.VISIBLE : View.GONE}">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="6dp"
+                        android:text="密送人："
+                        android:textColor="@android:color/black" />
+
+                    <TextView
                         android:id="@+id/tv_copy"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{viewModel.copy}"
+                        android:text="@{viewModel.bcc}"
                         android:textColor="@android:color/black" />
                 </LinearLayout>
 

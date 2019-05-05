@@ -1,18 +1,20 @@
 package com.example.emailmanager.data;
 
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 
-public class EmailDetail extends BaseObservable {
+public class EmailDetail extends BaseObservable implements Serializable {
     private int id;
     private boolean isRead;
     private String subject;
     private String date;
     private String from;
+    private String personal;
     private String to;
     private String cc;
     private String bcc;
@@ -27,6 +29,14 @@ public class EmailDetail extends BaseObservable {
         this.subject = subject;
         this.date = date;
         this.from = from;
+    }
+
+    public void setPersonal(String personal) {
+        this.personal = personal;
+    }
+
+    public String getPersonal() {
+        return personal;
     }
 
     @Bindable

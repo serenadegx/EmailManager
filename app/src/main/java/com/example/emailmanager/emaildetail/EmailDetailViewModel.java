@@ -11,12 +11,13 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.Toast;
 
 import com.example.emailmanager.EMApplication;
+import com.example.emailmanager.data.AccessoryDetail;
 import com.example.emailmanager.data.EmailDetail;
 import com.example.emailmanager.data.source.EmailDataSource;
 import com.example.emailmanager.data.source.EmailRepository;
@@ -38,30 +39,46 @@ public class EmailDetailViewModel {
     private static final int READ_SUCCESS = 4;
     private static final int READ_ERROR = 5;
     public final ObservableField<String> receivers = new ObservableField<>();
-    public final ObservableField<String> copy = new ObservableField<>();
+    public final ObservableField<String> cc = new ObservableField<>();
+    public final ObservableField<String> bcc = new ObservableField<>();
     public final ObservableField<String> subject = new ObservableField<>();
     public final ObservableField<String> date = new ObservableField<>();
     public final ObservableField<String> accessory = new ObservableField<>();
     public final ObservableBoolean isAttach = new ObservableBoolean();
+    public final ObservableBoolean isCc = new ObservableBoolean();
+    public final ObservableBoolean isBcc = new ObservableBoolean();
     private final int msgNum;
     private Context mContext;
     private EmailRepository mEmailRepository;
     private AccessoryListAdapter adapter;
     private WebView webview;
+    private EmailDetail detail;
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.what == SUCCESS) {
-                EmailDetail emailDetail = (EmailDetail) msg.obj;
-                receivers.set(emailDetail.getTo());
-                subject.set(emailDetail.getSubject());
-                date.set(emailDetail.getDate());
-                isAttach.set(emailDetail.getAccessoryList().size() > 0);
-                accessory.set(emailDetail.getAccessoryList().size() + "个附件");
-                adapter.refreshData(emailDetail.getAccessoryList());
+                detail = (EmailDetail) msg.obj;
+                ((Activity) mContext).setTitle(TextUtils.isEmpty(detail.getPersonal()) ? detail.getFrom() : detail.getPersonal());
+                receivers.set(detail.getTo());
+                isCc.set(!TextUtils.isEmpty(detail.getCc()));
+                if (!TextUtils.isEmpty(detail.getCc())) {
+                    cc.set(detail.getCc());
+                }
+                isBcc.set(!TextUtils.isEmpty(detail.getBcc()));
+                if (!TextUtils.isEmpty(detail.getBcc())) {
+                    bcc.set(detail.getBcc());
+                }
+                subject.set(detail.getSubject());
+                date.set(detail.getDate());
+                isAttach.set(detail.getAccessoryList().size() > 0);
+                accessory.set(detail.getAccessoryList().size() + "个附件");
+                for (AccessoryDetail accessory : detail.getAccessoryList()) {
+                    accessory.setDownload(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/EmailManager", accessory.getFileName()).exists());
+                }
+                adapter.refreshData(detail.getAccessoryList());
 
-                XRWebView.with(webview).simple().build().loadHtml(emailDetail.getContent(), "text/html", "utf-8");
+                XRWebView.with(webview).simple().build().loadHtml(detail.getContent(), "text/html", "utf-8");
             } else if (msg.what == DELETE_SUCCESS) {
                 Toast.makeText(mContext, "删除成功", Toast.LENGTH_SHORT).show();
                 ((Activity) mContext).finish();
@@ -119,37 +136,35 @@ public class EmailDetailViewModel {
     }
 
     public void reply(View v) {
-        SendMsgActivity.start2SendMsgActivity(mContext, msgNum, SendMsgActivity.REPLY);
+        SendMsgActivity.start2SendMsgActivity(mContext, detail, SendMsgActivity.REPLY);
     }
 
     public void replyAll(View v) {
-        SendMsgActivity.start2SendMsgActivity(mContext, msgNum, SendMsgActivity.REPLY_ALL);
+        SendMsgActivity.start2SendMsgActivity(mContext, detail, SendMsgActivity.REPLY_ALL);
     }
 
     public void forward(View v) {
-        SendMsgActivity.start2SendMsgActivity(mContext, msgNum, SendMsgActivity.FORWARD);
+        SendMsgActivity.start2SendMsgActivity(mContext, detail, SendMsgActivity.FORWARD);
     }
 
     public void delete(View v) {
-        new Thread() {
-            @Override
-            public void run() {
-                mEmailRepository.deleteById(EMApplication.getAccount(), msgNum, new EmailDataSource.GetResultCallBack() {
+        new AlertDialog.Builder(mContext)
+                .setTitle("提示信息")
+                .setMessage("是否删除邮件")
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onSuccess() {
-                        mHandler.sendEmptyMessage(DELETE_SUCCESS);
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
                     }
+                })
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
 
                     @Override
-                    public void onError(String ex) {
-                        Message message = Message.obtain();
-                        message.what = SUCCESS;
-                        message.obj = ex;
-                        mHandler.sendMessage(message);
+                    public void onClick(DialogInterface dialog, int which) {
+                        realDelete();
                     }
-                });
-            }
-        }.start();
+                }).show();
+
     }
 
     void handleRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -192,5 +207,27 @@ public class EmailDetailViewModel {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         intent.setData(Uri.parse("package:" + mContext.getPackageName()));
         mContext.startActivity(intent);
+    }
+
+    private void realDelete() {
+        new Thread() {
+            @Override
+            public void run() {
+                mEmailRepository.deleteById(EMApplication.getAccount(), msgNum, new EmailDataSource.GetResultCallBack() {
+                    @Override
+                    public void onSuccess() {
+                        mHandler.sendEmptyMessage(DELETE_SUCCESS);
+                    }
+
+                    @Override
+                    public void onError(String ex) {
+                        Message message = Message.obtain();
+                        message.what = SUCCESS;
+                        message.obj = ex;
+                        mHandler.sendMessage(message);
+                    }
+                });
+            }
+        }.start();
     }
 }

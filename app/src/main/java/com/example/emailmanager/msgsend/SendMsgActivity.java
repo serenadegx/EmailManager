@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.example.emailmanager.R;
+import com.example.emailmanager.data.EmailDetail;
 import com.example.emailmanager.data.source.EmailRepository;
 import com.example.emailmanager.databinding.ActivityMsgSendBinding;
 
@@ -30,7 +31,7 @@ public class SendMsgActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         ActivityMsgSendBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_msg_send);
         initToolbar(binding);
-        viewModel = new SendMsgViewModel(this, new EmailRepository(), getIntent().getIntExtra("id", -1));
+        viewModel = new SendMsgViewModel(this, new EmailRepository(), (EmailDetail) getIntent().getSerializableExtra("detail"));
         binding.setViewModel(viewModel);
     }
 
@@ -56,8 +57,22 @@ public class SendMsgActivity extends AppCompatActivity {
                 viewModel.replyAll();
             }
             return true;
+        } else {
+            openFile();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        viewModel.handleOnActivityResult(requestCode, resultCode, data);
+    }
+
+    private void openFile() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");//设置类型，我这里是任意类型，任意后缀的可以这样写。
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        startActivityForResult(intent,1);
     }
 
     @Override
@@ -90,8 +105,10 @@ public class SendMsgActivity extends AppCompatActivity {
         });
     }
 
-    public static void start2SendMsgActivity(Context context) {
-        context.startActivity(new Intent(context, SendMsgActivity.class));
+    public static void start2SendMsgActivity(Context context, EmailDetail detail, int flag) {
+        context.startActivity(new Intent(context, SendMsgActivity.class)
+                .putExtra("detail", detail)
+                .putExtra("flag", flag));
     }
 
     public static void start2SendMsgActivity(Context context, int flag) {
@@ -99,9 +116,4 @@ public class SendMsgActivity extends AppCompatActivity {
                 .putExtra("flag", flag));
     }
 
-    public static void start2SendMsgActivity(Context context, int msgNum, int flag) {
-        context.startActivity(new Intent(context, SendMsgActivity.class)
-                .putExtra("id", msgNum)
-                .putExtra("flag", flag));
-    }
 }

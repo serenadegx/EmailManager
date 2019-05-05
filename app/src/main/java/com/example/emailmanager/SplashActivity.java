@@ -25,6 +25,8 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         DataBindingUtil.setContentView(this, R.layout.activity_splash);
         initData();
+        QueryBuilder<AccountDetail> queryBuilder = EMApplication.getDaoSession().getAccountDetailDao().queryBuilder().where(AccountDetailDao.Properties.IsCur.eq("true"));
+        final List<AccountDetail> accounts = queryBuilder.list();
         new Thread() {
             @Override
             public void run() {
@@ -32,8 +34,6 @@ public class SplashActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        QueryBuilder<AccountDetail> queryBuilder = EMApplication.getDaoSession().getAccountDetailDao().queryBuilder().where(AccountDetailDao.Properties.IsCur.eq("true"));
-                        List<AccountDetail> accounts = queryBuilder.list();
                         if (accounts != null && accounts.size() > 0) {
                             AccountDetail accountDetail = accounts.get(0);
                             Log.i("mango", "account:" + accountDetail.getAccount() + "    isCurrent:" + accountDetail.isCur() + "  ReceiveProtocol:"

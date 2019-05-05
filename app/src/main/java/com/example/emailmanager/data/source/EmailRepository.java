@@ -262,16 +262,34 @@ public class EmailRepository {
             Message message = inbox.getMessage(msgNum);
             //标记已读
             message.setFlag(Flags.Flag.SEEN, true);
-            InternetAddress address = (InternetAddress) message.getFrom()[0];
-            data = new EmailDetail(message.getMessageNumber(), message.getSubject(),
-                    dateFormat(message.getReceivedDate()), TextUtils.isEmpty(address.getPersonal())
-                    ? address.getAddress() : address.getPersonal());
+            data = new EmailDetail();
             Address[] recipients = message.getRecipients(Message.RecipientType.TO);
             StringBuffer sb = new StringBuffer();
             for (Address recipient : recipients) {
                 sb.append(((InternetAddress) recipient).getAddress() + ";");
             }
             data.setTo(sb.toString());
+            Address[] ccs = message.getRecipients(Message.RecipientType.CC);
+            StringBuffer sbCc = new StringBuffer();
+            if (ccs != null) {
+                for (Address recipient : ccs) {
+                    sbCc.append(((InternetAddress) recipient).getAddress() + ";");
+                }
+                data.setCc(sbCc.toString());
+            }
+            StringBuffer sbBcc = new StringBuffer();
+            Address[] bccs = message.getRecipients(Message.RecipientType.BCC);
+            if (bccs != null) {
+                for (Address recipient : bccs) {
+                    sbBcc.append(((InternetAddress) recipient).getAddress() + ";");
+                }
+                data.setBcc(sbBcc.toString());
+            }
+            InternetAddress address = (InternetAddress) message.getFrom()[0];
+            data.setFrom(address.getAddress());
+            data.setPersonal(address.getPersonal());
+            data.setSubject(message.getSubject());
+            data.setDate(dateFormat(message.getReceivedDate()));
             dumpPart(message, data);
         } catch (NoSuchProviderException e) {
             e.printStackTrace();
@@ -280,14 +298,14 @@ public class EmailRepository {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (inbox != null)
-                    inbox.close();
-                if (store != null)
-                    store.close();
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                if (inbox != null)
+//                    inbox.close();
+//                if (store != null)
+//                    store.close();
+//            } catch (MessagingException e) {
+//                e.printStackTrace();
+//            }
         }
         return data;
     }
@@ -661,7 +679,8 @@ public class EmailRepository {
             if (o instanceof InputStream) {
                 InputStream is = (InputStream) o;
                 if (filename != null) {
-                    data.getAccessoryList().add(new AccessoryDetail(MimeUtility.decodeText(filename), "", getPrintSize(p.getSize()), false));
+//                    data.getAccessoryList().add(new AccessoryDetail(MimeUtility.decodeText(filename), "", getPrintSize(p.getSize()), false));
+                    data.getAccessoryList().add(new AccessoryDetail(MimeUtility.decodeText(filename), getPrintSize(p.getSize()), p.getSize(), is));
                     Log.i("mango", "FILENAME: " + MimeUtility.decodeText(filename));
                 }
 //                Log.i("mango", "未知类型邮件InputStream");
