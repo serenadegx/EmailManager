@@ -39,7 +39,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:text="@{item.fileName}"
-            android:maxLength="16"
             app:layout_constraintLeft_toRightOf="@id/iv_file"
             app:layout_constraintTop_toTopOf="@id/iv_file" />
 

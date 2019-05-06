@@ -13,10 +13,12 @@ import com.example.emailmanager.R;
 import com.example.emailmanager.data.EmailDetail;
 import com.example.emailmanager.data.source.EmailRepository;
 import com.example.emailmanager.databinding.ActivityMsgSendBinding;
+import com.example.emailmanager.msgsend.adapter.AccessoryListAdapter;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 public class SendMsgActivity extends AppCompatActivity {
     public static final int SEND = 1;
@@ -31,7 +33,11 @@ public class SendMsgActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         ActivityMsgSendBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_msg_send);
         initToolbar(binding);
+        binding.rvAccessory.setLayoutManager(new LinearLayoutManager(this));
+        AccessoryListAdapter listAdapter = new AccessoryListAdapter(this);
+        binding.rvAccessory.setAdapter(listAdapter);
         viewModel = new SendMsgViewModel(this, new EmailRepository(), (EmailDetail) getIntent().getSerializableExtra("detail"));
+        viewModel.setAdapter(listAdapter);
         binding.setViewModel(viewModel);
     }
 

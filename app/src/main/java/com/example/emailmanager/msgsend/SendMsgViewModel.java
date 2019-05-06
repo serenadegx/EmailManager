@@ -1,8 +1,10 @@
 package com.example.emailmanager.msgsend;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
@@ -17,8 +19,13 @@ import com.example.emailmanager.data.AccessoryDetail;
 import com.example.emailmanager.data.EmailDetail;
 import com.example.emailmanager.data.source.EmailDataSource;
 import com.example.emailmanager.data.source.EmailRepository;
+import com.example.emailmanager.msgsend.adapter.AccessoryListAdapter;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,11 +57,17 @@ public class SendMsgViewModel {
     private final Context mContext;
     private final EmailRepository mEmailRepository;
     private final EmailDetail mDetail;
+    private List<AccessoryDetail> mAccessory;
+    private AccessoryListAdapter mAdapter;
+    private ProgressDialog dialog;
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             String hint;
             if (msg.what == SUCCESS) {
+                if (dialog!=null){
+                    dialog.cancel();
+                }
                 hint = "发送成功";
                 ((Activity) mContext).finish();
             } else if (msg.what == ERROR) {
@@ -65,6 +78,9 @@ public class SendMsgViewModel {
             } else if (msg.what == ERROR) {
                 hint = (String) msg.obj;
             } else if (msg.what == FORWARD_SUCCESS) {
+                if (dialog!=null){
+                    dialog.cancel();
+                }
                 hint = "转发成功";
                 ((Activity) mContext).finish();
             } else if (msg.what == FORWARD_ERROR) {
@@ -80,6 +96,7 @@ public class SendMsgViewModel {
         this.mContext = mContext;
         this.mEmailRepository = mEmailRepository;
         this.mDetail = detail;
+        mAccessory = new ArrayList<>();
         send.set(EMApplication.getAccount().getAccount());
         int flag = ((Activity) mContext).getIntent().getIntExtra("flag", -1);
         if (flag == SendMsgActivity.SEND) {
@@ -107,7 +124,7 @@ public class SendMsgViewModel {
     }
 
     public void sendMsg() {
-
+        dialog = ProgressDialog.show(mContext,"","正在发送...",false,false);
         final EmailDetail data = new EmailDetail();
         data.setFrom(TextUtils.isEmpty(send.get()) ? null : send.get());
         data.setTo(TextUtils.isEmpty(receiver.get()) ? null : receiver.get());
@@ -115,9 +132,7 @@ public class SendMsgViewModel {
         data.setBcc(TextUtils.isEmpty(secret.get()) ? null : secret.get());
         data.setSubject(subject.get());
         data.setContent(content.get());
-        List<AccessoryDetail> attach = new ArrayList<>();
-        attach.add(new AccessoryDetail(Environment.getExternalStorageDirectory() + "/example.jpeg"));
-        data.setAccessoryList(attach);
+        data.setAccessoryList(mAccessory);
         new Thread() {
             @Override
             public void run() {
@@ -273,9 +288,92 @@ public class SendMsgViewModel {
     void handleOnActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1) {
             Uri uri = data.getData();
-            String path = uri.getPath();
+            String path = getPath(mContext, uri);
             Log.i("mango", "path:" + path);
-
+            mAccessory.add(new AccessoryDetail(getFileName(path), path, getPrintSize(path)));
+            mAdapter.refreshData(mAccessory);
         }
+    }
+
+    public static String getPath(Context context, Uri uri) {
+        if ("content".equalsIgnoreCase(uri.getScheme())) {
+            String[] projection = {"_data"};
+            Cursor cursor = null;
+            try {
+                cursor = context.getContentResolver().query(uri, projection, null, null, null);
+                int column_index = cursor.getColumnIndexOrThrow("_data");
+                if (cursor.moveToFirst()) {
+                    return cursor.getString(column_index);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (cursor != null)
+                    cursor.close();
+            }
+        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return uri.getPath();
+        }
+        return null;
+    }
+
+    public static String getFileName(String path) {
+        return path.substring(path.lastIndexOf("/") + 1);
+    }
+
+    public static long getSize(String path) {
+        long size = 0;
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(new File(path));
+            size = fis.getChannel().size();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (fis != null)
+                    fis.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return size;
+    }
+
+    public static String getPrintSize(String path) {
+        long size = getSize(path);
+        //如果字节数少于1024，则直接以B为单位，否则先除于1024，后3位因太少无意义
+        if (size < 1024) {
+            return String.valueOf(size) + " B";
+        } else {
+            size = size / 1024;
+        }
+        //如果原字节数除于1024之后，少于1024，则可以直接以KB作为单位
+        //因为还没有到达要使用另一个单位的时候
+        //接下去以此类推
+        if (size < 1024) {
+            return String.valueOf(size) + " KB";
+        } else {
+            size = size / 1024;
+        }
+        if (size < 1024) {
+            //因为如果以MB为单位的话，要保留最后1位小数，
+            //因此，把此数乘以100之后再取余
+            size = size * 100;
+            return String.valueOf((size / 100)) + "."
+                    + String.valueOf((size * 100 / 1024 % 100)) + "MB";
+        } else {
+            //否则如果要以GB为单位的，先除于1024再作同样的处理
+            size = size * 100 / 1024;
+            return String.valueOf((size / 100)) + "."
+                    + String.valueOf((size % 100)) + " GB";
+        }
+    }
+
+    public void setAdapter(AccessoryListAdapter listAdapter) {
+        this.mAdapter = listAdapter;
+        mAdapter.refreshData(mAccessory);
     }
 }

@@ -360,7 +360,7 @@ public class EmailRepository {
             if (data.getAccessoryList() != null && data.getAccessoryList().size() > 0) {
                 for (AccessoryDetail detail1 : data.getAccessoryList()) {
                     MimeBodyPart mbp2 = new MimeBodyPart();
-                    mbp2.attachFile(detail1.getFileName());
+                    mbp2.attachFile(detail1.getPath());
                     mp.addBodyPart(mbp2);
                 }
             }

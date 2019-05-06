@@ -8,7 +8,7 @@ import androidx.databinding.Bindable;
 
 public class AccessoryDetail extends BaseObservable {
     private String fileName;
-    private String downloadUrl;
+    private String path;
     private String size;
     private long total;
     private boolean isDownload;
@@ -18,11 +18,24 @@ public class AccessoryDetail extends BaseObservable {
         this.fileName = fileName;
     }
 
-    public AccessoryDetail(String fileName, String downloadUrl, String size, boolean isDownload) {
+    public AccessoryDetail(String fileName, String path, String size, boolean isDownload) {
         this.fileName = fileName;
-        this.downloadUrl = downloadUrl;
+        this.path = path;
         this.size = size;
         this.isDownload = isDownload;
+    }
+
+    public AccessoryDetail(String fileName, String size, long total, InputStream is) {
+        this.fileName = fileName;
+        this.size = size;
+        this.total = total;
+        this.is = is;
+    }
+
+    public AccessoryDetail(String fileName, String path, String size) {
+        this.fileName = fileName;
+        this.path = path;
+        this.size = size;
     }
 
     public long getTotal() {
@@ -31,13 +44,6 @@ public class AccessoryDetail extends BaseObservable {
 
     public void setTotal(long total) {
         this.total = total;
-    }
-
-    public AccessoryDetail(String fileName, String size, long total, InputStream is) {
-        this.fileName = fileName;
-        this.size = size;
-        this.total = total;
-        this.is = is;
     }
 
     public void setIs(InputStream is) {
@@ -52,8 +58,8 @@ public class AccessoryDetail extends BaseObservable {
         this.fileName = fileName;
     }
 
-    public void setDownloadUrl(String downloadUrl) {
-        this.downloadUrl = downloadUrl;
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public void setSize(String size) {
@@ -69,8 +75,8 @@ public class AccessoryDetail extends BaseObservable {
         return fileName;
     }
 
-    public String getDownloadUrl() {
-        return downloadUrl;
+    public String getPath() {
+        return path;
     }
 
     @Bindable
