@@ -51,9 +51,11 @@
                         android:text="收件人:" />
 
                     <EditText
+                        android:id="@+id/et_receiver"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="4"
+                        android:addTextChangedListener="@{viewModel.watcherReceiver}"
                         android:text="@={viewModel.receiver}" />
 
                     <ImageView
@@ -89,9 +91,11 @@
                         android:text="抄&#12288;送:" />
 
                     <EditText
+                        android:id="@+id/et_copy"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="4"
+                        android:addTextChangedListener="@{viewModel.watcherCopy}"
                         android:text="@={viewModel.copy}" />
 
                     <ImageView
@@ -127,9 +131,11 @@
                         android:text="密&#12288;送:" />
 
                     <EditText
+                        android:id="@+id/et_secret"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="4"
+                        android:addTextChangedListener="@{viewModel.watcherSecret}"
                         android:text="@={viewModel.secret}" />
 
                     <ImageView
@@ -165,9 +171,11 @@
                         android:text="发件人:" />
 
                     <EditText
+                        android:id="@+id/et_send"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="4"
+                        android:addTextChangedListener="@{viewModel.watcherSend}"
                         android:text="@={viewModel.send}" />
 
                     <ImageView

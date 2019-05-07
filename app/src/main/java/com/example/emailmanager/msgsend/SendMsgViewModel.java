@@ -9,16 +9,25 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListPopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.emailmanager.EMApplication;
 import com.example.emailmanager.data.AccessoryDetail;
+import com.example.emailmanager.data.Contacts;
 import com.example.emailmanager.data.EmailDetail;
 import com.example.emailmanager.data.source.EmailDataSource;
 import com.example.emailmanager.data.source.EmailRepository;
+import com.example.emailmanager.databinding.ActivityMsgSendBinding;
 import com.example.emailmanager.msgsend.adapter.AccessoryListAdapter;
 
 import java.io.File;
@@ -36,6 +45,8 @@ import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.util.ByteArrayDataSource;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.databinding.ObservableField;
 
 public class SendMsgViewModel {
@@ -57,6 +68,7 @@ public class SendMsgViewModel {
     private final Context mContext;
     private final EmailRepository mEmailRepository;
     private final EmailDetail mDetail;
+    private final ActivityMsgSendBinding binding;
     private List<AccessoryDetail> mAccessory;
     private AccessoryListAdapter mAdapter;
     private ProgressDialog dialog;
@@ -65,7 +77,7 @@ public class SendMsgViewModel {
         public void handleMessage(Message msg) {
             String hint;
             if (msg.what == SUCCESS) {
-                if (dialog!=null){
+                if (dialog != null) {
                     dialog.cancel();
                 }
                 hint = "发送成功";
@@ -78,7 +90,7 @@ public class SendMsgViewModel {
             } else if (msg.what == ERROR) {
                 hint = (String) msg.obj;
             } else if (msg.what == FORWARD_SUCCESS) {
-                if (dialog!=null){
+                if (dialog != null) {
                     dialog.cancel();
                 }
                 hint = "转发成功";
@@ -91,8 +103,11 @@ public class SendMsgViewModel {
             Toast.makeText(mContext, hint, Toast.LENGTH_SHORT).show();
         }
     };
+    private ListPopupWindow popupWindow;
+    private ArrayAdapter<Contacts> adapter;
 
-    public SendMsgViewModel(Context mContext, EmailRepository mEmailRepository, EmailDetail detail) {
+    public SendMsgViewModel(Context mContext, EmailRepository mEmailRepository, EmailDetail detail, ActivityMsgSendBinding binding) {
+        this.binding = binding;
         this.mContext = mContext;
         this.mEmailRepository = mEmailRepository;
         this.mDetail = detail;
@@ -114,17 +129,8 @@ public class SendMsgViewModel {
     }
 
 
-    public void addReceiver(View view) {
-    }
-
-    public void addCopy(View view) {
-    }
-
-    public void addSecret(View view) {
-    }
-
     public void sendMsg() {
-        dialog = ProgressDialog.show(mContext,"","正在发送...",false,false);
+        dialog = ProgressDialog.show(mContext, "", "正在发送...", false, false);
         final EmailDetail data = new EmailDetail();
         data.setFrom(TextUtils.isEmpty(send.get()) ? null : send.get());
         data.setTo(TextUtils.isEmpty(receiver.get()) ? null : receiver.get());
@@ -255,36 +261,6 @@ public class SendMsgViewModel {
         reply();
     }
 
-    public String collect(EmailDetail data) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(data.getContent() + "<br>");
-        sb.append("<div style=\"line-height:1.5\"><br><br>-------- 原始邮件 --------<br>");
-        sb.append("主题：" + data.getSubject() + "<br>");
-        sb.append("发件人：" + data.getFrom() + "<br>");
-
-        if (data.getTo() != null) {
-            sb.append("收件人：");
-            sb.append(data.getTo() + ";");
-            sb.append("<br>");
-        }
-
-        if (data.getCc() != null) {
-            sb.append("抄送：");
-            sb.append(data.getCc() + ";");
-            sb.append("<br>");
-        }
-
-        if (data.getBcc() != null) {
-            sb.append("密送：");
-            sb.append(data.getBcc() + ";");
-            sb.append("<br>");
-        }
-        sb.append("发件时间：" + data.getDate() + "<br>");
-        sb.append("</div><br>");
-        sb.append(content);
-        return sb.toString();
-    }
-
     void handleOnActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1) {
             Uri uri = data.getData();
@@ -293,6 +269,114 @@ public class SendMsgViewModel {
             mAccessory.add(new AccessoryDetail(getFileName(path), path, getPrintSize(path)));
             mAdapter.refreshData(mAccessory);
         }
+    }
+
+    public TextWatcher watcherReceiver = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            showFilterContacts(s.toString(), binding.etReceiver, receiver);
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    };
+
+    private void showFilterContacts(String str, View view, final ObservableField<String> ob) {
+
+        final List<Contacts> contacts = new ArrayList<>();
+        for (Contacts contact :
+                EMApplication.getContacts()) {
+            if (contact.getAddress().contains(str) || contact.getPersonal().contains(str)) {
+                contacts.add(contact);
+                Log.i("mango", "contact:" + contact.getPersonal());
+            }
+        }
+        if (popupWindow == null) {
+            popupWindow = new ListPopupWindow(mContext);
+            adapter = new ArrayAdapter<>(mContext,
+                    android.R.layout.simple_list_item_1, contacts);
+            popupWindow.setAdapter(adapter);
+            popupWindow.setModal(false);
+            popupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    ob.set(contacts.get(position).getAddress());
+                    popupWindow.dismiss();
+                }
+            });
+            popupWindow.setAnchorView(view);
+            popupWindow.show();
+        } else {
+            adapter.clear();
+            adapter.addAll(contacts);
+            adapter.notifyDataSetChanged();
+            if (!popupWindow.isShowing()){
+                popupWindow.show();
+            }
+        }
+
+    }
+
+    public TextWatcher watcherCopy = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    };
+    public TextWatcher watcherSecret = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    };
+    public TextWatcher watcherSend = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    };
+
+    public void setAdapter(AccessoryListAdapter listAdapter) {
+        this.mAdapter = listAdapter;
+        mAdapter.refreshData(mAccessory);
     }
 
     public static String getPath(Context context, Uri uri) {
@@ -372,8 +456,12 @@ public class SendMsgViewModel {
         }
     }
 
-    public void setAdapter(AccessoryListAdapter listAdapter) {
-        this.mAdapter = listAdapter;
-        mAdapter.refreshData(mAccessory);
+    public void addReceiver(View view) {
+    }
+
+    public void addCopy(View view) {
+    }
+
+    public void addSecret(View view) {
     }
 }

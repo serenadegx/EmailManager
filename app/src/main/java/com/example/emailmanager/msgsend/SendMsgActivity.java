@@ -36,7 +36,7 @@ public class SendMsgActivity extends AppCompatActivity {
         binding.rvAccessory.setLayoutManager(new LinearLayoutManager(this));
         AccessoryListAdapter listAdapter = new AccessoryListAdapter(this);
         binding.rvAccessory.setAdapter(listAdapter);
-        viewModel = new SendMsgViewModel(this, new EmailRepository(), (EmailDetail) getIntent().getSerializableExtra("detail"));
+        viewModel = new SendMsgViewModel(this, new EmailRepository(), (EmailDetail) getIntent().getSerializableExtra("detail"),binding);
         viewModel.setAdapter(listAdapter);
         binding.setViewModel(viewModel);
     }

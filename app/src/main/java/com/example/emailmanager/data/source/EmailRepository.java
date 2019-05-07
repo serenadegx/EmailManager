@@ -3,8 +3,10 @@ package com.example.emailmanager.data.source;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.example.emailmanager.EMApplication;
 import com.example.emailmanager.data.AccessoryDetail;
 import com.example.emailmanager.data.AccountDetail;
+import com.example.emailmanager.data.Contacts;
 import com.example.emailmanager.data.EmailDetail;
 import com.sun.mail.smtp.SMTPTransport;
 
@@ -58,6 +60,7 @@ public class EmailRepository {
 
     private void remoteData(final AccountDetail detail, EmailDataSource.GetEmailsCallBack callBack) {
         List<EmailDetail> data = new ArrayList<>();
+        List<Contacts> contacts = new ArrayList<>();
         Properties props = System.getProperties();
         props.put(detail.getEmail().getReceiveHostKey(), detail.getEmail().getReceiveHostValue());
         props.put(detail.getEmail().getReceivePortKey(), detail.getEmail().getReceivePortValue());
@@ -82,6 +85,7 @@ public class EmailRepository {
                 InternetAddress address = (InternetAddress) message.getFrom()[0];
                 InternetAddress to = (InternetAddress) message.getRecipients(Message.RecipientType.TO)[0];
                 personal = to.getPersonal();
+                contacts.add(new Contacts(address.getPersonal(), address.getAddress()));
                 EmailDetail emailDetail = new EmailDetail(message.getMessageNumber(), message.getSubject(),
                         dateFormat(message.getReceivedDate()), TextUtils.isEmpty(address.getPersonal())
                         ? address.getAddress() : address.getPersonal());
@@ -91,6 +95,7 @@ public class EmailRepository {
             }
             Collections.reverse(data);
             callBack.onEmailsLoaded(data);
+            EMApplication.setContacts(contacts);
         } catch (NoSuchProviderException e) {
             callBack.onDataNotAvailable();
             e.printStackTrace();
