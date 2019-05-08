@@ -1,6 +1,7 @@
 package com.example.emailmanager.data;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public class Contacts {
     private String personal;
@@ -31,5 +32,10 @@ public class Contacts {
     @Override
     public String toString() {
         return personal;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return (obj instanceof Contacts) && this.getAddress().equals(((Contacts) obj).getAddress());
     }
 }

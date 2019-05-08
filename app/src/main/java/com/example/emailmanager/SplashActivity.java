@@ -2,14 +2,12 @@ package com.example.emailmanager;
 
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.emailmanager.account.EmailCategoryActivity;
 import com.example.emailmanager.data.AccountDetail;
 import com.example.emailmanager.data.AccountDetailDao;
 import com.example.emailmanager.data.Email;
-import com.example.emailmanager.data.EmailDao;
 
 import org.greenrobot.greendao.query.QueryBuilder;
 

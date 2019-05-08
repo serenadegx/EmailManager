@@ -11,8 +11,6 @@ import com.example.emailmanager.data.EmailDetail;
 import com.sun.mail.smtp.SMTPTransport;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -85,13 +83,16 @@ public class EmailRepository {
                 InternetAddress address = (InternetAddress) message.getFrom()[0];
                 InternetAddress to = (InternetAddress) message.getRecipients(Message.RecipientType.TO)[0];
                 personal = to.getPersonal();
-                contacts.add(new Contacts(address.getPersonal(), address.getAddress()));
-                EmailDetail emailDetail = new EmailDetail(message.getMessageNumber(), message.getSubject(),
+                Contacts contact = new Contacts(address.getPersonal(), address.getAddress());
+                if (!contacts.contains(contact))
+                    contacts.add(contact);
+                EmailDetail emailDetail = new EmailDetail((long) message.getMessageNumber(), message.getSubject(),
                         dateFormat(message.getReceivedDate()), TextUtils.isEmpty(address.getPersonal())
                         ? address.getAddress() : address.getPersonal());
                 //仅支持imap
                 emailDetail.setRead(message.getFlags().contains(Flags.Flag.SEEN));
                 data.add(emailDetail);
+                Log.i("mango", "MessageNumber:" + message.getMessageNumber());
             }
             Collections.reverse(data);
             callBack.onEmailsLoaded(data);
@@ -150,7 +151,7 @@ public class EmailRepository {
                 }
                 sb.replace(sb.length() - 1, sb.length(), "");
                 personal = to.getPersonal();
-                EmailDetail emailDetail = new EmailDetail(message.getMessageNumber(), message.getSubject(),
+                EmailDetail emailDetail = new EmailDetail((long) message.getMessageNumber(), message.getSubject(),
                         dateFormat(message.getReceivedDate()), sb.toString());
                 //发件箱默认已读
                 emailDetail.setRead(true);
@@ -210,7 +211,7 @@ public class EmailRepository {
                 }
                 sb.replace(sb.length() - 1, sb.length(), "");
                 personal = to.getPersonal();
-                EmailDetail emailDetail = new EmailDetail(message.getMessageNumber(), message.getSubject(),
+                EmailDetail emailDetail = new EmailDetail((long) message.getMessageNumber(), message.getSubject(),
                         dateFormat(message.getReceivedDate()), sb.toString());
                 //发件箱默认已读
                 emailDetail.setRead(true);
@@ -568,11 +569,10 @@ public class EmailRepository {
 
     /**
      * 转发
-     *
-     * @param msgNum
+     *  @param msgNum
      * @param data
      */
-    public void forward(final AccountDetail detail, int msgNum, EmailDetail data, EmailDataSource.GetResultCallBack callBack) {
+    public void forward(final AccountDetail detail, long msgNum, EmailDetail data, EmailDataSource.GetResultCallBack callBack) {
         Properties props = System.getProperties();
         props.put(detail.getEmail().getSendHostKey(), detail.getEmail().getSendHostValue());
         props.put(detail.getEmail().getSendPortKey(), detail.getEmail().getSendPortValue());
@@ -593,7 +593,7 @@ public class EmailRepository {
             store.connect();
             folder = store.getFolder("inbox");
             folder.open(Folder.READ_ONLY);
-            Message message = folder.getMessage(msgNum);
+            Message message = folder.getMessage((int) msgNum);
             Message forward = new MimeMessage(session);
             if (data.getFrom() != null) {
                 forward.setFrom(new InternetAddress(data.getFrom(), "果心蕊菜牙xr"));
@@ -653,12 +653,11 @@ public class EmailRepository {
 
     /**
      * 回复
-     *
-     * @param msgNum
+     *  @param msgNum
      * @param data
      * @param callBack
      */
-    public void reply(AccountDetail detail, int msgNum, EmailDetail data, EmailDataSource.GetResultCallBack callBack) {
+    public void reply(AccountDetail detail, Long msgNum, EmailDetail data, EmailDataSource.GetResultCallBack callBack) {
         forward(detail, msgNum, data, callBack);
     }
 

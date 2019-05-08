@@ -1,8 +1,8 @@
 package com.example.emailmanager.data;
 
+
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.Keep;
 import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.annotation.ToOne;
 import org.greenrobot.greendao.annotation.Generated;
@@ -184,9 +184,7 @@ public class AccountDetail {
         this.emailId = emailId;
     }
 
-    /**
-     * called by internal mechanisms, do not call yourself.
-     */
+    /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 1905580256)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;

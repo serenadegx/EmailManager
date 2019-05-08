@@ -288,6 +288,57 @@ public class SendMsgViewModel {
         }
     };
 
+    public TextWatcher watcherCopy = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            showFilterContacts(s.toString(), binding.etCopy, copy);
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    };
+
+    public TextWatcher watcherSecret = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            showFilterContacts(s.toString(), binding.etSecret, secret);
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    };
+
+    public TextWatcher watcherSend = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            showFilterContacts(s.toString(), binding.etSend, send);
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    };
+
     private void showFilterContacts(String str, View view, final ObservableField<String> ob) {
 
         final List<Contacts> contacts = new ArrayList<>();
@@ -314,65 +365,32 @@ public class SendMsgViewModel {
             });
             popupWindow.setAnchorView(view);
             popupWindow.show();
-        } else {
+        } else if (view == popupWindow.getAnchorView()) {
             adapter.clear();
             adapter.addAll(contacts);
             adapter.notifyDataSetChanged();
-            if (!popupWindow.isShowing()){
+            if (!popupWindow.isShowing()) {
                 popupWindow.show();
             }
+        } else {
+            popupWindow = new ListPopupWindow(mContext);
+            adapter = new ArrayAdapter<>(mContext,
+                    android.R.layout.simple_list_item_1, contacts);
+            popupWindow.setAdapter(adapter);
+            popupWindow.setModal(false);
+            popupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    ob.set(contacts.get(position).getAddress());
+                    popupWindow.dismiss();
+                }
+            });
+            popupWindow.setAnchorView(view);
+            popupWindow.show();
         }
 
     }
-
-    public TextWatcher watcherCopy = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-
-        }
-    };
-    public TextWatcher watcherSecret = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-
-        }
-    };
-    public TextWatcher watcherSend = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-
-        }
-    };
 
     public void setAdapter(AccessoryListAdapter listAdapter) {
         this.mAdapter = listAdapter;

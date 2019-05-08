@@ -55,7 +55,7 @@ public class EmailsViewModel {
                 mEmailRepository.loadData(EMApplication.getAccount(), new EmailDataSource.GetEmailsCallBack() {
                     @Override
                     public void onEmailsLoaded(List<EmailDetail> emails) {
-
+                        insert(emails);
                         Message message = Message.obtain();
                         message.what = SUCCESS;
                         message.obj = emails;
@@ -70,6 +70,18 @@ public class EmailsViewModel {
             }
         }.start();
 
+    }
+
+    private void insert(List<EmailDetail> emails) {
+        List<EmailDetail> local = EMApplication.getDaoSession().getEmailDetailDao().loadAll();
+        if (local != null && local.size() > 0) {
+            for (EmailDetail emailDetail : emails) {
+                if (!local.contains(emailDetail))
+                    EMApplication.getDaoSession().getEmailDetailDao().insert(emailDetail);
+            }
+        } else {
+            EMApplication.getDaoSession().getEmailDetailDao().insertInTx(emails);
+        }
     }
 
     public void loadEmailsFromSent() {
