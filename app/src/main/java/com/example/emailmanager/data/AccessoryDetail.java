@@ -10,6 +10,7 @@ import java.io.InputStream;
 import androidx.annotation.Nullable;
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
+
 import org.greenrobot.greendao.annotation.Generated;
 
 @Entity
@@ -49,9 +50,15 @@ public class AccessoryDetail extends BaseObservable {
         this.size = size;
     }
 
+    public AccessoryDetail(Long emailId, String fileName, String size) {
+        this.fileName = fileName;
+        this.size = size;
+        this.emailId = emailId;
+    }
+
     @Generated(hash = 1796029192)
     public AccessoryDetail(Long id, String fileName, String path, String size, long total, boolean isDownload,
-            Long emailId) {
+                           Long emailId) {
         this.id = id;
         this.fileName = fileName;
         this.path = path;
@@ -64,6 +71,7 @@ public class AccessoryDetail extends BaseObservable {
     @Generated(hash = 797569814)
     public AccessoryDetail() {
     }
+
 
     public long getTotal() {
         return total;
@@ -126,7 +134,8 @@ public class AccessoryDetail extends BaseObservable {
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        return obj instanceof AccessoryDetail && this.getFileName().equals(((AccessoryDetail) obj).getFileName());
+        return obj instanceof AccessoryDetail && this.getFileName().equals(((AccessoryDetail) obj)
+                .getFileName()) && this.getEmailId() == ((AccessoryDetail) obj).getEmailId();
     }
 
     public Long getId() {

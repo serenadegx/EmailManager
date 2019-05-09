@@ -1,6 +1,8 @@
 package com.example.emailmanager.data.source.local;
 
 import com.example.emailmanager.EMApplication;
+import com.example.emailmanager.data.AccessoryDetail;
+import com.example.emailmanager.data.AccountDetail;
 import com.example.emailmanager.data.EmailDetail;
 import com.example.emailmanager.data.EmailDetailDao;
 import com.example.emailmanager.data.source.EmailDataSource;
@@ -11,8 +13,11 @@ import java.util.List;
 
 public class EmailLocalDataSource implements EmailDataSource {
     @Override
-    public void getEmails(GetEmailsCallBack callBack) {
-        List<EmailDetail> local = EMApplication.getDaoSession().getEmailDetailDao().loadAll();
+    public void getEmails(AccountDetail detail, GetEmailsCallBack callBack) {
+        List<EmailDetail> local = EMApplication.getDaoSession().getEmailDetailDao()
+                .queryBuilder()
+                .where(EmailDetailDao.Properties.From.eq(detail.getAccount()))
+                .list();
         if (local != null && local.size() < 1) {
             callBack.onEmailsLoaded(local);
         } else {
@@ -21,9 +26,10 @@ public class EmailLocalDataSource implements EmailDataSource {
     }
 
     @Override
-    public void getEmail(String id, GetEmailCallBack callBack) {
+    public void getEmail(AccountDetail detail, long id, GetEmailCallBack callBack) {
         QueryBuilder<EmailDetail> qb = EMApplication.getDaoSession().getEmailDetailDao().queryBuilder();
-        List<EmailDetail> details = qb.where(EmailDetailDao.Properties.Id.eq(id)).list();
+        qb.and(EmailDetailDao.Properties.From.eq(detail.getAccount()),EmailDetailDao.Properties.Id.eq(id));
+        List<EmailDetail> details = qb.list();
         if (details != null && details.size() == 1) {
             callBack.onEmailLoaded(details.get(0));
         } else {
@@ -57,11 +63,20 @@ public class EmailLocalDataSource implements EmailDataSource {
     }
 
     public void insert(List<EmailDetail> emails) {
-        List<EmailDetail> local = EMApplication.getDaoSession().getEmailDetailDao().loadAll();
-        if (local != null && local.size() > 0) {
+        List<EmailDetail> localEmailDetail = EMApplication.getDaoSession().getEmailDetailDao().loadAll();
+        List<AccessoryDetail> accessoryDetails = EMApplication.getDaoSession().getAccessoryDetailDao().loadAll();
+        if (localEmailDetail != null && localEmailDetail.size() > 0) {
             for (EmailDetail emailDetail : emails) {
-                if (!local.contains(emailDetail))
+                if (!localEmailDetail.contains(emailDetail))
                     EMApplication.getDaoSession().getEmailDetailDao().insert(emailDetail);
+                if (accessoryDetails != null && accessoryDetails.size() > 0) {
+                    for (AccessoryDetail accessoryDetail : emailDetail.getAccessoryList()) {
+                        if (!accessoryDetails.contains(accessoryDetail))
+                            EMApplication.getDaoSession().getAccessoryDetailDao().insert(accessoryDetail);
+                    }
+                } else {
+                    EMApplication.getDaoSession().getAccessoryDetailDao().insertInTx(emailDetail.getAccessoryList());
+                }
             }
         } else {
             EMApplication.getDaoSession().getEmailDetailDao().insertInTx(emails);
