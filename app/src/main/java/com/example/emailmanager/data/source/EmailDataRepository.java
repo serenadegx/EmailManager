@@ -5,7 +5,7 @@ import com.example.emailmanager.data.EmailDetail;
 
 public class EmailDataRepository implements EmailDataSource {
 
-
+    private boolean isCache;
     @Override
     public void getEmails(AccountDetail detail, GetEmailsCallBack callBack) {
 
