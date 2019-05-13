@@ -6,7 +6,10 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.example.emailmanager.R;
+import com.example.emailmanager.data.source.EmailDataRepository;
 import com.example.emailmanager.data.source.EmailRepository;
+import com.example.emailmanager.data.source.local.EmailLocalDataSource;
+import com.example.emailmanager.data.source.remote.EmailRemoteDataSource;
 import com.example.emailmanager.databinding.ActivityEmailDetailBinding;
 import com.example.emailmanager.emaildetail.adapter.AccessoryListAdapter;
 
@@ -29,7 +32,8 @@ public class EmailDetailActivity extends AppCompatActivity {
         binding.rvAccessory.setLayoutManager(new LinearLayoutManager(this));
         AccessoryListAdapter listAdapter = new AccessoryListAdapter(this);
         binding.rvAccessory.setAdapter(listAdapter);
-        viewModel = new EmailDetailViewModel(this, new EmailRepository(), getIntent().getIntExtra("msgnum", 0));
+        viewModel = new EmailDetailViewModel(this, new EmailDataRepository(new EmailLocalDataSource()
+                ,new EmailRemoteDataSource()), getIntent().getLongExtra("msgnum", 0));
         binding.setViewModel(viewModel);
         viewModel.setAdapter(listAdapter);
         viewModel.setWebView(binding.webView);

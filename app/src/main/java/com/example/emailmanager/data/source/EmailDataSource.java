@@ -6,6 +6,10 @@ import com.example.emailmanager.data.EmailDetail;
 import java.util.List;
 
 public interface EmailDataSource {
+    void deleteAll();
+
+    void saveAll(List<EmailDetail> emails);
+
     interface GetEmailsCallBack {
 
         void onEmailsLoaded(List<EmailDetail> emails);
@@ -28,15 +32,17 @@ public interface EmailDataSource {
 
     void getEmails(AccountDetail detail, GetEmailsCallBack callBack);
 
-    void getEmail(AccountDetail detail,long id, GetEmailCallBack callBack);
+    void getEmail(AccountDetail detail, long id, GetEmailCallBack callBack);
 
-    void sendEmail(EmailDetail email);
+    void sendEmail(AccountDetail detail, EmailDetail email, EmailDataSource.GetResultCallBack callBack);
 
-    void deleteEmail(String id);
+    void reply(AccountDetail detail, EmailDetail email, EmailDataSource.GetResultCallBack callBack);
 
-    void reply(EmailDetail emailDetail);
+    void signRead(AccountDetail detail, EmailDetail email);
 
-    void signRead(EmailDetail emailDetail);
+    void forward(AccountDetail detail, EmailDetail email, EmailDataSource.GetResultCallBack callBack);
 
-    void forward(EmailDetail emailDetail);
+    void save2Drafts(AccountDetail detail, EmailDetail data, EmailDataSource.GetResultCallBack callBack);
+
+    void deleteEmail(AccountDetail detail, long id, GetResultCallBack callBack);
 }

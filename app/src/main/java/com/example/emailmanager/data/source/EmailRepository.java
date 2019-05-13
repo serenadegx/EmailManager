@@ -569,7 +569,8 @@ public class EmailRepository {
 
     /**
      * 转发
-     *  @param msgNum
+     *
+     * @param msgNum
      * @param data
      */
     public void forward(final AccountDetail detail, long msgNum, EmailDetail data, EmailDataSource.GetResultCallBack callBack) {
@@ -653,7 +654,8 @@ public class EmailRepository {
 
     /**
      * 回复
-     *  @param msgNum
+     *
+     * @param msgNum
      * @param data
      * @param callBack
      */

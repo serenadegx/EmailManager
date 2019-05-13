@@ -27,16 +27,12 @@ public class EmailDetail extends BaseObservable implements Serializable {
     private String date;
     private String from;
     private String personal;
-    @Transient
     private String to;
-    @Transient
     private String cc;
-    @Transient
     private String bcc;
-    @Transient
     private String content;
     @ToMany(referencedJoinProperty = "emailId")
-    private List<AccessoryDetail> accessoryList = new ArrayList<>();
+    private List<AccessoryDetail> accessoryList;
     /** Used to resolve relations */
     @Generated(hash = 2040040024)
     private transient DaoSession daoSession;
@@ -54,15 +50,19 @@ public class EmailDetail extends BaseObservable implements Serializable {
         this.from = from;
     }
 
-    @Generated(hash = 560960926)
+    @Generated(hash = 2132571833)
     public EmailDetail(Long id, boolean isRead, String subject, String date, String from,
-            String personal) {
+            String personal, String to, String cc, String bcc, String content) {
         this.id = id;
         this.isRead = isRead;
         this.subject = subject;
         this.date = date;
         this.from = from;
         this.personal = personal;
+        this.to = to;
+        this.cc = cc;
+        this.bcc = bcc;
+        this.content = content;
     }
 
     public void setPersonal(String personal) {
@@ -127,33 +127,6 @@ public class EmailDetail extends BaseObservable implements Serializable {
         this.to = to;
     }
 
-    public void setAccessoryList(List<AccessoryDetail> accessoryList) {
-        this.accessoryList = accessoryList;
-    }
-
-    /**
-     * To-many relationship, resolved on first access (and after reset).
-     * Changes to to-many relations are not persisted, make changes to the target entity.
-     */
-    @Generated(hash = 1926107967)
-    public List<AccessoryDetail> getAccessoryList() {
-        if (accessoryList == null) {
-            final DaoSession daoSession = this.daoSession;
-            if (daoSession == null) {
-                throw new DaoException("Entity is detached from DAO context");
-            }
-            AccessoryDetailDao targetDao = daoSession.getAccessoryDetailDao();
-            List<AccessoryDetail> accessoryListNew = targetDao
-                    ._queryEmailDetail_AccessoryList(id);
-            synchronized (this) {
-                if (accessoryList == null) {
-                    accessoryList = accessoryListNew;
-                }
-            }
-        }
-        return accessoryList;
-    }
-
     public String getContent() {
         return content;
     }
@@ -186,9 +159,37 @@ public class EmailDetail extends BaseObservable implements Serializable {
         this.isRead = isRead;
     }
 
+    public void setAccessoryList(List<AccessoryDetail> accessoryList) {
+        this.accessoryList = accessoryList;
+    }
+    
+
     @Override
     public boolean equals(@Nullable Object obj) {
         return (obj instanceof EmailDetail && this.getId() == ((EmailDetail) obj).getId());
+    }
+
+    /**
+     * To-many relationship, resolved on first access (and after reset).
+     * Changes to to-many relations are not persisted, make changes to the target entity.
+     */
+    @Generated(hash = 1926107967)
+    public List<AccessoryDetail> getAccessoryList() {
+        if (accessoryList == null) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            AccessoryDetailDao targetDao = daoSession.getAccessoryDetailDao();
+            List<AccessoryDetail> accessoryListNew = targetDao
+                    ._queryEmailDetail_AccessoryList(id);
+            synchronized (this) {
+                if (accessoryList == null) {
+                    accessoryList = accessoryListNew;
+                }
+            }
+        }
+        return accessoryList;
     }
 
     /** Resets a to-many relationship, making the next get call to query for a fresh result. */
@@ -239,4 +240,5 @@ public class EmailDetail extends BaseObservable implements Serializable {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getEmailDetailDao() : null;
     }
+
 }

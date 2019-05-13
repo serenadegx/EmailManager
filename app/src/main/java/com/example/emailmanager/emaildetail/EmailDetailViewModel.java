@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.example.emailmanager.EMApplication;
 import com.example.emailmanager.data.AccessoryDetail;
 import com.example.emailmanager.data.EmailDetail;
+import com.example.emailmanager.data.source.EmailDataRepository;
 import com.example.emailmanager.data.source.EmailDataSource;
 import com.example.emailmanager.data.source.EmailRepository;
 import com.example.emailmanager.emaildetail.adapter.AccessoryListAdapter;
@@ -36,6 +37,7 @@ public class EmailDetailViewModel {
     private static final int DELETE_SUCCESS = 1;
     private static final int DELETE_ERROR = 2;
     private static final int SUCCESS = 3;
+    private static final int ERROR = 6;
     private static final int READ_SUCCESS = 4;
     private static final int READ_ERROR = 5;
     public final ObservableField<String> receivers = new ObservableField<>();
@@ -47,9 +49,9 @@ public class EmailDetailViewModel {
     public final ObservableBoolean isAttach = new ObservableBoolean();
     public final ObservableBoolean isCc = new ObservableBoolean();
     public final ObservableBoolean isBcc = new ObservableBoolean();
-    private final int msgNum;
+    private final long msgNum;
     private Context mContext;
-    private EmailRepository mEmailRepository;
+    private EmailDataRepository mEmailRepository;
     private AccessoryListAdapter adapter;
     private WebView webview;
     private EmailDetail detail;
@@ -84,11 +86,13 @@ public class EmailDetailViewModel {
                 ((Activity) mContext).finish();
             } else if (msg.what == DELETE_ERROR) {
                 Toast.makeText(mContext, (String) msg.obj, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(mContext, "获取邮件详情失败", Toast.LENGTH_SHORT).show();
             }
         }
     };
 
-    public EmailDetailViewModel(Context mContext, EmailRepository mEmailRepository, int msgnum) {
+    public EmailDetailViewModel(Context mContext, EmailDataRepository mEmailRepository, long msgnum) {
         this.mContext = mContext;
         this.mEmailRepository = mEmailRepository;
         this.msgNum = msgnum;
@@ -98,11 +102,21 @@ public class EmailDetailViewModel {
         new Thread() {
             @Override
             public void run() {
-                EmailDetail emailDetail = mEmailRepository.loadRemoteDataById(EMApplication.getAccount(), msgNum);
-                Message message = Message.obtain();
-                message.what = SUCCESS;
-                message.obj = emailDetail;
-                mHandler.sendMessage(message);
+                mEmailRepository.getEmail(EMApplication.getAccount(), msgNum, new EmailDataSource.GetEmailCallBack() {
+                    @Override
+                    public void onEmailLoaded(EmailDetail email) {
+                        Message message = Message.obtain();
+                        message.what = SUCCESS;
+                        message.obj = email;
+                        mHandler.sendMessage(message);
+                    }
+
+                    @Override
+                    public void onDataNotAvailable() {
+                        mHandler.sendEmptyMessage(ERROR);
+                    }
+                });
+
 //                saveHtml(emailDetail);
             }
         }.start();
@@ -161,6 +175,7 @@ public class EmailDetailViewModel {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
                         realDelete();
                     }
                 }).show();
@@ -213,7 +228,7 @@ public class EmailDetailViewModel {
         new Thread() {
             @Override
             public void run() {
-                mEmailRepository.deleteById(EMApplication.getAccount(), msgNum, new EmailDataSource.GetResultCallBack() {
+                mEmailRepository.deleteEmail(EMApplication.getAccount(), msgNum, new EmailDataSource.GetResultCallBack() {
                     @Override
                     public void onSuccess() {
                         mHandler.sendEmptyMessage(DELETE_SUCCESS);

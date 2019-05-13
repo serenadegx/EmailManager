@@ -61,6 +61,13 @@ public class MainActivity extends AppCompatActivity
         bundle.putInt(InboxFragment.FLAG, InboxFragment.INBOX);
         inboxFragment.setArguments(bundle);
         getSupportFragmentManager().beginTransaction().replace(R.id.fl_contain, inboxFragment).commit();
+        initMonitor();
+    }
+
+    private void initMonitor() {
+        //监听新邮件
+        Intent intentService = new Intent(this, NewEmailService.class);
+        startService(intentService);
     }
 
 

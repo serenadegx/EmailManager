@@ -6,7 +6,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.emailmanager.R;
+import com.example.emailmanager.data.source.EmailDataRepository;
 import com.example.emailmanager.data.source.EmailRepository;
+import com.example.emailmanager.data.source.local.EmailLocalDataSource;
+import com.example.emailmanager.data.source.remote.EmailRemoteDataSource;
 import com.example.emailmanager.databinding.FragmentInboxBinding;
 import com.example.emailmanager.emails.adapter.EmailListAdapter;
 import com.example.emailmanager.utils.EMDecoration;
@@ -58,7 +61,7 @@ public class InboxFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         binding.rv.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.rv.addItemDecoration(new EMDecoration(getActivity(), EMDecoration.VERTICAL_LIST, R.drawable.list_divider, 0));
         binding.srl.setOnRefreshListener(this);
-        viewModel = new EmailsViewModel(new EmailRepository(), getContext(), binding.srl);
+        viewModel = new EmailsViewModel(new EmailDataRepository(new EmailLocalDataSource(),new EmailRemoteDataSource()), getContext(), binding.srl);
         binding.setViewModel(viewModel);
 
         return binding.getRoot();
@@ -68,7 +71,7 @@ public class InboxFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     public void onRefresh() {
         switch (getArguments().getInt(FLAG)) {
             case INBOX:
-                viewModel.loadEmails();
+                viewModel.refresh();
                 break;
             case SENT_MESSAGES:
                 viewModel.loadEmailsFromSent();

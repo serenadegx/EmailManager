@@ -11,7 +11,10 @@ import android.view.View;
 
 import com.example.emailmanager.R;
 import com.example.emailmanager.data.EmailDetail;
+import com.example.emailmanager.data.source.EmailDataRepository;
 import com.example.emailmanager.data.source.EmailRepository;
+import com.example.emailmanager.data.source.local.EmailLocalDataSource;
+import com.example.emailmanager.data.source.remote.EmailRemoteDataSource;
 import com.example.emailmanager.databinding.ActivityMsgSendBinding;
 import com.example.emailmanager.msgsend.adapter.AccessoryListAdapter;
 
@@ -36,7 +39,8 @@ public class SendMsgActivity extends AppCompatActivity {
         binding.rvAccessory.setLayoutManager(new LinearLayoutManager(this));
         AccessoryListAdapter listAdapter = new AccessoryListAdapter(this);
         binding.rvAccessory.setAdapter(listAdapter);
-        viewModel = new SendMsgViewModel(this, new EmailRepository(), (EmailDetail) getIntent().getSerializableExtra("detail"),binding);
+        viewModel = new SendMsgViewModel(this, new EmailDataRepository(new EmailLocalDataSource()
+                ,new EmailRemoteDataSource()), (EmailDetail) getIntent().getSerializableExtra("detail"),binding);
         viewModel.setAdapter(listAdapter);
         binding.setViewModel(viewModel);
     }

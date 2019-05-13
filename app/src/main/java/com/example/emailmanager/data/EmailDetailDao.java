@@ -28,6 +28,10 @@ public class EmailDetailDao extends AbstractDao<EmailDetail, Long> {
         public final static Property Date = new Property(3, String.class, "date", false, "DATE");
         public final static Property From = new Property(4, String.class, "from", false, "FROM");
         public final static Property Personal = new Property(5, String.class, "personal", false, "PERSONAL");
+        public final static Property To = new Property(6, String.class, "to", false, "TO");
+        public final static Property Cc = new Property(7, String.class, "cc", false, "CC");
+        public final static Property Bcc = new Property(8, String.class, "bcc", false, "BCC");
+        public final static Property Content = new Property(9, String.class, "content", false, "CONTENT");
     }
 
     private DaoSession daoSession;
@@ -51,7 +55,11 @@ public class EmailDetailDao extends AbstractDao<EmailDetail, Long> {
                 "\"SUBJECT\" TEXT," + // 2: subject
                 "\"DATE\" TEXT," + // 3: date
                 "\"FROM\" TEXT," + // 4: from
-                "\"PERSONAL\" TEXT);"); // 5: personal
+                "\"PERSONAL\" TEXT," + // 5: personal
+                "\"TO\" TEXT," + // 6: to
+                "\"CC\" TEXT," + // 7: cc
+                "\"BCC\" TEXT," + // 8: bcc
+                "\"CONTENT\" TEXT);"); // 9: content
     }
 
     /** Drops the underlying database table. */
@@ -89,6 +97,26 @@ public class EmailDetailDao extends AbstractDao<EmailDetail, Long> {
         if (personal != null) {
             stmt.bindString(6, personal);
         }
+ 
+        String to = entity.getTo();
+        if (to != null) {
+            stmt.bindString(7, to);
+        }
+ 
+        String cc = entity.getCc();
+        if (cc != null) {
+            stmt.bindString(8, cc);
+        }
+ 
+        String bcc = entity.getBcc();
+        if (bcc != null) {
+            stmt.bindString(9, bcc);
+        }
+ 
+        String content = entity.getContent();
+        if (content != null) {
+            stmt.bindString(10, content);
+        }
     }
 
     @Override
@@ -120,6 +148,26 @@ public class EmailDetailDao extends AbstractDao<EmailDetail, Long> {
         if (personal != null) {
             stmt.bindString(6, personal);
         }
+ 
+        String to = entity.getTo();
+        if (to != null) {
+            stmt.bindString(7, to);
+        }
+ 
+        String cc = entity.getCc();
+        if (cc != null) {
+            stmt.bindString(8, cc);
+        }
+ 
+        String bcc = entity.getBcc();
+        if (bcc != null) {
+            stmt.bindString(9, bcc);
+        }
+ 
+        String content = entity.getContent();
+        if (content != null) {
+            stmt.bindString(10, content);
+        }
     }
 
     @Override
@@ -141,7 +189,11 @@ public class EmailDetailDao extends AbstractDao<EmailDetail, Long> {
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // subject
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // date
             cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // from
-            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5) // personal
+            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // personal
+            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // to
+            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // cc
+            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // bcc
+            cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9) // content
         );
         return entity;
     }
@@ -154,6 +206,10 @@ public class EmailDetailDao extends AbstractDao<EmailDetail, Long> {
         entity.setDate(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
         entity.setFrom(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
         entity.setPersonal(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
+        entity.setTo(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
+        entity.setCc(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
+        entity.setBcc(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
+        entity.setContent(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
      }
     
     @Override

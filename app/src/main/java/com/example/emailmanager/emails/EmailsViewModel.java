@@ -6,11 +6,14 @@ import android.os.Message;
 import android.widget.Toast;
 
 import com.example.emailmanager.EMApplication;
+import com.example.emailmanager.data.Contacts;
 import com.example.emailmanager.data.EmailDetail;
+import com.example.emailmanager.data.source.EmailDataRepository;
 import com.example.emailmanager.data.source.EmailDataSource;
 import com.example.emailmanager.data.source.EmailRepository;
 import com.example.emailmanager.emails.adapter.EmailListAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -18,7 +21,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 public class EmailsViewModel {
     private static final int SUCCESS = 1;
     private static final int ERROR = 2;
-    private final EmailRepository mEmailRepository;
+    private final EmailDataRepository mEmailRepository;
     private final Context mContext;
     private final SwipeRefreshLayout srl;
     private EmailListAdapter adapter;
@@ -36,7 +39,7 @@ public class EmailsViewModel {
         }
     };
 
-    public EmailsViewModel(EmailRepository mEmailRepository, Context context, SwipeRefreshLayout srl) {
+    public EmailsViewModel(EmailDataRepository mEmailRepository, Context context, SwipeRefreshLayout srl) {
         this.mEmailRepository = mEmailRepository;
         this.mContext = context;
         this.srl = srl;
@@ -47,15 +50,26 @@ public class EmailsViewModel {
         this.adapter = listAdapter;
     }
 
+    public void refresh() {
+        mEmailRepository.refreshEmails();
+        loadEmails();
+    }
+
     public void loadEmails() {
         showLoading();
         new Thread() {
             @Override
             public void run() {
-                mEmailRepository.loadData(EMApplication.getAccount(), new EmailDataSource.GetEmailsCallBack() {
+                mEmailRepository.getEmails(EMApplication.getAccount(), new EmailDataSource.GetEmailsCallBack() {
                     @Override
                     public void onEmailsLoaded(List<EmailDetail> emails) {
-                        insert(emails);
+                        List<Contacts> contacts = new ArrayList<>();
+                        for (EmailDetail detail : emails) {
+                            Contacts contact = new Contacts(detail.getPersonal(), detail.getFrom());
+                            if (!contacts.contains(contact))
+                                contacts.add(contact);
+                        }
+                        EMApplication.setContacts(contacts);
                         Message message = Message.obtain();
                         message.what = SUCCESS;
                         message.obj = emails;
@@ -70,18 +84,6 @@ public class EmailsViewModel {
             }
         }.start();
 
-    }
-
-    private void insert(List<EmailDetail> emails) {
-        List<EmailDetail> local = EMApplication.getDaoSession().getEmailDetailDao().loadAll();
-        if (local != null && local.size() > 0) {
-            for (EmailDetail emailDetail : emails) {
-                if (!local.contains(emailDetail))
-                    EMApplication.getDaoSession().getEmailDetailDao().insert(emailDetail);
-            }
-        } else {
-            EMApplication.getDaoSession().getEmailDetailDao().insertInTx(emails);
-        }
     }
 
     public void loadEmailsFromSent() {

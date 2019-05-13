@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.example.emailmanager.data.AccountDetail;
 import com.sun.mail.imap.IMAPFolder;
 
 import java.util.Properties;
@@ -38,21 +39,22 @@ public class NewEmailService extends Service {
         new Thread() {
             @Override
             public void run() {
+                final AccountDetail account = EMApplication.getAccount();
                 Properties props = System.getProperties();
-                props.put("mail.imap.host", "imap.qq.com");
-                props.put("mail.imap.port", "993");
-                props.put("mail.imap.ssl.enable", true);
+                props.put(account.getEmail().getReceiveHostKey(), account.getEmail().getReceiveHostValue());
+                props.put(account.getEmail().getReceivePortKey(), account.getEmail().getReceivePortValue());
+                props.put(account.getEmail().getReceiveEncryptKey(), account.getEmail().getReceiveEncryptValue());
                 Session session = Session.getInstance(props, new Authenticator() {
                     @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
                         return new PasswordAuthentication(
-                                "1099805713@qq.com", "pfujejqwrezxgbjj");
+                                account.getAccount(), account.getPwd());
                     }
                 });
                 session.setDebug(true);
                 Store store = null;
                 try {
-                    store = session.getStore("imap");
+                    store = session.getStore(account.getEmail().getReceiveProtocol());
                     store.connect();
                     Folder folder = store.getFolder("INBOX");
                     folder.open(Folder.READ_WRITE);

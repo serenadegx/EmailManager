@@ -9,6 +9,7 @@ import com.example.emailmanager.data.source.EmailDataSource;
 
 import org.greenrobot.greendao.query.QueryBuilder;
 
+import java.util.Collections;
 import java.util.List;
 
 public class EmailLocalDataSource implements EmailDataSource {
@@ -16,9 +17,10 @@ public class EmailLocalDataSource implements EmailDataSource {
     public void getEmails(AccountDetail detail, GetEmailsCallBack callBack) {
         List<EmailDetail> local = EMApplication.getDaoSession().getEmailDetailDao()
                 .queryBuilder()
-                .where(EmailDetailDao.Properties.From.eq(detail.getAccount()))
+//                .where(EmailDetailDao.Properties.From.eq(detail.getAccount()))
                 .list();
-        if (local != null && local.size() < 1) {
+        if (local != null && local.size() > 0) {
+            Collections.reverse(local);
             callBack.onEmailsLoaded(local);
         } else {
             callBack.onDataNotAvailable();
@@ -28,7 +30,8 @@ public class EmailLocalDataSource implements EmailDataSource {
     @Override
     public void getEmail(AccountDetail detail, long id, GetEmailCallBack callBack) {
         QueryBuilder<EmailDetail> qb = EMApplication.getDaoSession().getEmailDetailDao().queryBuilder();
-        qb.and(EmailDetailDao.Properties.From.eq(detail.getAccount()),EmailDetailDao.Properties.Id.eq(id));
+        qb.where(EmailDetailDao.Properties.Id.eq(id));
+//        qb.and(EmailDetailDao.Properties.From.eq(detail.getAccount()), EmailDetailDao.Properties.Id.eq(id));
         List<EmailDetail> details = qb.list();
         if (details != null && details.size() == 1) {
             callBack.onEmailLoaded(details.get(0));
@@ -38,28 +41,53 @@ public class EmailLocalDataSource implements EmailDataSource {
     }
 
     @Override
-    public void sendEmail(EmailDetail email) {
+    public void deleteEmail(AccountDetail detail, long id, GetResultCallBack callBack) {
+        EMApplication.getDaoSession().getEmailDetailDao().deleteByKey(id);
+        callBack.onSuccess();
+    }
+
+    @Override
+    public void signRead(AccountDetail detail, EmailDetail email) {
+        QueryBuilder<EmailDetail> qb = EMApplication.getDaoSession().getEmailDetailDao().queryBuilder();
+        List<EmailDetail> list = qb.where(EmailDetailDao.Properties.Id.eq(email.getId())).list();
+        EmailDetail emailDetail = list.get(0);
+        emailDetail.setRead(true);
+        EMApplication.getDaoSession().getEmailDetailDao().update(emailDetail);
+    }
+
+    @Override
+    public void sendEmail(AccountDetail detail, EmailDetail email, EmailDataSource.GetResultCallBack callBack) {
 
     }
 
     @Override
-    public void deleteEmail(String id) {
+    public void reply(AccountDetail detail, EmailDetail email, GetResultCallBack callBack) {
 
     }
 
     @Override
-    public void reply(EmailDetail emailDetail) {
+    public void forward(AccountDetail detail, EmailDetail email, GetResultCallBack callBack) {
 
     }
 
     @Override
-    public void signRead(EmailDetail emailDetail) {
+    public void save2Drafts(AccountDetail detail, EmailDetail data, GetResultCallBack callBack) {
 
     }
 
-    @Override
-    public void forward(EmailDetail emailDetail) {
 
+    @Override
+    public void deleteAll() {
+        EMApplication.getDaoSession().getAccessoryDetailDao().deleteAll();
+        EMApplication.getDaoSession().getEmailDetailDao().deleteAll();
+    }
+
+    @Override
+    public void saveAll(List<EmailDetail> emails) {
+        EMApplication.getDaoSession().getEmailDetailDao().insertInTx(emails);
+        for (EmailDetail emailDetail : emails) {
+            EMApplication.getDaoSession().getAccessoryDetailDao().insertInTx(emailDetail.getAccessoryList());
+        }
     }
 
     public void insert(List<EmailDetail> emails) {
