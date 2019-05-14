@@ -13,6 +13,8 @@ import com.example.emailmanager.EMApplication;
 import com.example.emailmanager.MainActivity;
 import com.example.emailmanager.data.AccountDetail;
 import com.example.emailmanager.data.AccountDetailDao;
+import com.example.emailmanager.data.Email;
+import com.example.emailmanager.data.EmailDao;
 
 import org.greenrobot.greendao.query.QueryBuilder;
 
@@ -63,72 +65,76 @@ public class VerifyModel {
     }
 
     private void initData() {
-        account.set("1099805713@qq.com");
-        pwd.set("pfujejqwrezxgbjj");
+        account.set("guoxinrui@fantaike.ai");
+        pwd.set("1993Gxr");
     }
 
     public void addAccount(View v) {
         List<AccountDetail> accounts = EMApplication.getDaoSession().getAccountDetailDao().queryBuilder().where(AccountDetailDao.Properties.Account.eq(account.get())).list();
+        List<Email> emails = EMApplication.getDaoSession().getEmailDao().queryBuilder()
+                .where(EmailDao.Properties.CategoryId.eq(category))
+                .list();
         if (!(accounts != null && accounts.size() > 0)) {
-            Log.i("Mango", "addAccount");
-            new Thread() {
-                @Override
-                public void run() {
-                    Properties props = System.getProperties();
-                    props.put("mail.imap.host", host);
-                    props.put("mail.imap.port", "993");
-                    props.put("mail.imap.ssl.enable", true);
-                    Session session = Session.getInstance(props, new Authenticator() {
-                        @Override
-                        protected PasswordAuthentication getPasswordAuthentication() {
-                            return new PasswordAuthentication(
-                                    account.get(), pwd.get());
-                        }
-                    });
-                    session.setDebug(true);
-                    String msg;
-                    Store store = null;
-                    try {
-                        store = session.getStore("imap");
-                        store.connect();
-                        Folder[] folders = store.getDefaultFolder().list();
-                        for (Folder folder : folders) {
-                            Log.i("Mango", "folderName" + folder.getName());
-                        }
-                        //储存账号
-                        saveAccount();
-                        SystemClock.sleep(1000);
-                        msg = "验证成功";
-                        mHandler.sendEmptyMessage(SUCCESS);
-                    } catch (NoSuchProviderException e) {
-                        Message message = Message.obtain();
-                        message.what = ERROR;
-                        message.obj = "验证失败";
-                        mHandler.sendMessage(message);
-                        e.printStackTrace();
-                    } catch (MessagingException e) {
-                        Message message = Message.obtain();
-                        message.what = ERROR;
-                        message.obj = "验证失败";
-                        mHandler.sendMessage(message);
-                        e.printStackTrace();
-                    } finally {
+            if (emails != null && emails.size() == 1) {
+                final Email email = emails.get(0);
+
+
+                Log.i("Mango", "addAccount");
+                new Thread() {
+                    @Override
+                    public void run() {
+                        Properties props = System.getProperties();
+                        props.put(email.getReceiveHostKey(), email.getReceiveHostValue());
+                        props.put(email.getReceivePortKey(), email.getReceivePortValue());
+                        props.put(email.getReceiveEncryptKey(), email.getReceiveEncryptValue());
+                        Session session = Session.getInstance(props, new Authenticator() {
+                            @Override
+                            protected PasswordAuthentication getPasswordAuthentication() {
+                                return new PasswordAuthentication(
+                                        account.get(), pwd.get());
+                            }
+                        });
+                        session.setDebug(true);
+                        Store store = null;
                         try {
-                            store.close();
-                        } catch (MessagingException e) {
+                            store = session.getStore("imap");
+                            store.connect();
+                            Folder[] folders = store.getDefaultFolder().list();
+                            for (Folder folder : folders) {
+                                Log.i("Mango", "folderName" + folder.getName());
+                            }
+                            //储存账号
+                            saveAccount();
+                            SystemClock.sleep(1000);
+                            mHandler.sendEmptyMessage(SUCCESS);
+                        } catch (NoSuchProviderException e) {
+                            Message message = Message.obtain();
+                            message.what = ERROR;
+                            message.obj = "验证失败";
+                            mHandler.sendMessage(message);
                             e.printStackTrace();
+                        } catch (MessagingException e) {
+                            Message message = Message.obtain();
+                            message.what = ERROR;
+                            message.obj = "验证失败";
+                            mHandler.sendMessage(message);
+                            e.printStackTrace();
+                        } finally {
+                            try {
+                                store.close();
+                            } catch (MessagingException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
-
-                }
-            }.start();
-        } else {
-            Message message = Message.obtain();
-            message.what = ERROR;
-            message.obj = "账号重复";
-            mHandler.sendMessage(message);
+                }.start();
+            } else {
+                Message message = Message.obtain();
+                message.what = ERROR;
+                message.obj = "账号重复";
+                mHandler.sendMessage(message);
+            }
         }
-
 
     }
 

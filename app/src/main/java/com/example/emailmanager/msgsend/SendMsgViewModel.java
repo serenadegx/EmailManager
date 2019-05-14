@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -262,8 +263,8 @@ public class SendMsgViewModel {
     void handleOnActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1) {
             Uri uri = data.getData();
+            Log.i("mango", "path:" + uri.getPath() + "    Scheme:" + uri.getScheme());
             String path = getPath(mContext, uri);
-            Log.i("mango", "path:" + path);
             mAccessory.add(new AccessoryDetail(getFileName(path), path, getPrintSize(path)));
             mAdapter.refreshData(mAccessory);
         }
@@ -401,8 +402,8 @@ public class SendMsgViewModel {
             Cursor cursor = null;
             try {
                 cursor = context.getContentResolver().query(uri, projection, null, null, null);
-                int column_index = cursor.getColumnIndexOrThrow("_data");
-                if (cursor.moveToFirst()) {
+//                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                if (cursor != null && cursor.moveToFirst()) { final int column_index = cursor.getColumnIndexOrThrow("_data");
                     return cursor.getString(column_index);
                 }
             } catch (Exception e) {
@@ -412,6 +413,8 @@ public class SendMsgViewModel {
                     cursor.close();
             }
         } else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return uri.getPath();
+        } else {
             return uri.getPath();
         }
         return null;

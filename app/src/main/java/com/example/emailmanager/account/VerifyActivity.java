@@ -25,9 +25,6 @@ public class VerifyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         ActivityVerifyBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_verify);
         binding.setViewModel(new VerifyModel("imap.qq.com", this, getIntent().getLongExtra("category", 0)));
-        //监听新邮件
-        Intent intentService = new Intent(this, NewEmailService.class);
-        startService(intentService);
     }
 
     public static void start2VerifyActivity(Context context, long categoryId) {

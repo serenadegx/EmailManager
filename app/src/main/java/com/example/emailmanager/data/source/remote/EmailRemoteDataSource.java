@@ -71,22 +71,24 @@ public class EmailRemoteDataSource implements EmailDataSource {
                 EmailDetail emailDetail = new EmailDetail();
                 emailDetail.setId((long) message.getMessageNumber());
                 Address[] recipients = message.getRecipients(Message.RecipientType.TO);
-                StringBuffer sb = new StringBuffer();
-                for (Address recipient : recipients) {
-                    sb.append(((InternetAddress) recipient).getAddress() + ";");
+                if (recipients != null) {
+                    StringBuffer sb = new StringBuffer();
+                    for (Address recipient : recipients) {
+                        sb.append(((InternetAddress) recipient).getAddress() + ";");
+                    }
+                    emailDetail.setTo(sb.toString());
                 }
-                emailDetail.setTo(sb.toString());
                 Address[] ccs = message.getRecipients(Message.RecipientType.CC);
-                StringBuffer sbCc = new StringBuffer();
                 if (ccs != null) {
+                    StringBuffer sbCc = new StringBuffer();
                     for (Address recipient : ccs) {
                         sbCc.append(((InternetAddress) recipient).getAddress() + ";");
                     }
                     emailDetail.setCc(sbCc.toString());
                 }
-                StringBuffer sbBcc = new StringBuffer();
                 Address[] bccs = message.getRecipients(Message.RecipientType.BCC);
                 if (bccs != null) {
+                    StringBuffer sbBcc = new StringBuffer();
                     for (Address recipient : bccs) {
                         sbBcc.append(((InternetAddress) recipient).getAddress() + ";");
                     }
@@ -157,22 +159,24 @@ public class EmailRemoteDataSource implements EmailDataSource {
             data = new EmailDetail();
             data.setId((long) message.getMessageNumber());
             Address[] recipients = message.getRecipients(Message.RecipientType.TO);
-            StringBuffer sb = new StringBuffer();
-            for (Address recipient : recipients) {
-                sb.append(((InternetAddress) recipient).getAddress() + ";");
+            if (recipients != null) {
+                StringBuffer sb = new StringBuffer();
+                for (Address recipient : recipients) {
+                    sb.append(((InternetAddress) recipient).getAddress() + ";");
+                }
+                data.setTo(sb.toString());
             }
-            data.setTo(sb.toString());
             Address[] ccs = message.getRecipients(Message.RecipientType.CC);
-            StringBuffer sbCc = new StringBuffer();
             if (ccs != null) {
+                StringBuffer sbCc = new StringBuffer();
                 for (Address recipient : ccs) {
                     sbCc.append(((InternetAddress) recipient).getAddress() + ";");
                 }
                 data.setCc(sbCc.toString());
             }
-            StringBuffer sbBcc = new StringBuffer();
             Address[] bccs = message.getRecipients(Message.RecipientType.BCC);
             if (bccs != null) {
+                StringBuffer sbBcc = new StringBuffer();
                 for (Address recipient : bccs) {
                     sbBcc.append(((InternetAddress) recipient).getAddress() + ";");
                 }
@@ -187,9 +191,6 @@ public class EmailRemoteDataSource implements EmailDataSource {
             dumpPartReal(message, data);
             callBack.onEmailLoaded(data);
         } catch (NoSuchProviderException e) {
-            e.printStackTrace();
-            callBack.onDataNotAvailable();
-        } catch (MessagingException e) {
             e.printStackTrace();
             callBack.onDataNotAvailable();
         } catch (Exception e) {
@@ -496,56 +497,80 @@ public class EmailRemoteDataSource implements EmailDataSource {
 
     }
 
-    public static void dumpPart(Part p, EmailDetail data) throws Exception {
-        String filename = p.getFileName();
-        if (p.isMimeType("text/plain")) {
-            System.out.println((String) p.getContent());
-        } else if (p.isMimeType("multipart/*")) {
-            Multipart mp = (Multipart) p.getContent();
-            int count = mp.getCount();
-            for (int i = 0; i < count; i++)
-                dumpPart(mp.getBodyPart(i), data);
-        } else if (p.isMimeType("message/rfc822")) {
-            dumpPart((Part) p.getContent(), data);
-        } else {
-            Object o = p.getContent();
-            if (o instanceof InputStream) {
-                if (filename != null) {
-                    data.getAccessoryList().add(new AccessoryDetail(data.getId(), MimeUtility
-                            .decodeText(filename), getPrintSize(p.getSize())));
+    public static void dumpPart(Part p, EmailDetail data) {
+        try {
+            if (p.isMimeType("text/plain")) {
+                System.out.println((String) p.getContent());
+            } else if (p.isMimeType("multipart/*")) {
+                if (p.isMimeType("multipart/report")) {
+                    //                MimeMessage cmsg = new MimeMessage((MimeMessage) p);
+                    //                int count = cmsg.getCount();
+                    //                for (int i = 0; i < count; i++)
+                    //                    dumpPart(mp.getBodyPart(i), data);
+                    return;
+                } else {
+                    Multipart mp = (Multipart) p.getContent();
+                    int count = mp.getCount();
+                    for (int i = 0; i < count; i++)
+                        dumpPart(mp.getBodyPart(i), data);
                 }
-            } else if (o instanceof String) {
-                data.setContent((String) o);
+
+            } else if (p.isMimeType("message/rfc822")) {
+                dumpPart((Part) p.getContent(), data);
             } else {
-                Log.i("mango", "未知类型邮件");
+                Object o = p.getContent();
+                if (o instanceof InputStream) {
+                    if (p.getFileName() != null) {
+                        data.getAccessoryList().add(new AccessoryDetail(data.getId(), MimeUtility
+                                .decodeText(p.getFileName()), getPrintSize(p.getSize())));
+                    }
+                } else if (o instanceof String) {
+                    data.setContent((String) o);
+                } else {
+                    Log.i("mango", "未知类型邮件");
+                }
             }
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    public static void dumpPartReal(Part p, EmailDetail data) throws Exception {
-        String filename = p.getFileName();
-        if (p.isMimeType("text/plain")) {
-            System.out.println((String) p.getContent());
-        } else if (p.isMimeType("multipart/*")) {
-            Multipart mp = (Multipart) p.getContent();
-            int count = mp.getCount();
-            for (int i = 0; i < count; i++)
-                dumpPartReal(mp.getBodyPart(i), data);
-        } else if (p.isMimeType("message/rfc822")) {
-            dumpPartReal((Part) p.getContent(), data);
-        } else {
-            Object o = p.getContent();
-            if (o instanceof InputStream) {
-                if (filename != null) {
-                    InputStream is = (InputStream) o;
-                    data.getAccessoryList().add(new AccessoryDetail(MimeUtility.decodeText(filename), getPrintSize(p.getSize()), p.getSize(), is));
-                }
-            } else if (o instanceof String) {
-                data.setContent((String) o);
+    public static void dumpPartReal(Part p, EmailDetail data) {
+        String filename = null;
+        try {
+            filename = p.getFileName();
+            if (p.isMimeType("text/plain")) {
+                data.setContent((String) p.getContent());
+            } else if (p.isMimeType("multipart/*")) {
+                Multipart mp = (Multipart) p.getContent();
+                int count = mp.getCount();
+                for (int i = 0; i < count; i++)
+                    dumpPartReal(mp.getBodyPart(i), data);
+            } else if (p.isMimeType("message/rfc822")) {
+                dumpPartReal((Part) p.getContent(), data);
             } else {
-                Log.i("mango", "未知类型邮件");
+                Object o = p.getContent();
+                if (o instanceof InputStream) {
+                    if (filename != null) {
+                        InputStream is = (InputStream) o;
+                        data.getAccessoryList().add(new AccessoryDetail(MimeUtility.decodeText(filename), getPrintSize(p.getSize()), p.getSize(), is));
+                    }
+                } else if (o instanceof String) {
+                    data.setContent((String) o);
+                } else {
+                    Log.i("mango", "未知类型邮件");
+                }
             }
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
     }
 
     public static String getPrintSize(long size) {
@@ -665,8 +690,10 @@ public class EmailRemoteDataSource implements EmailDataSource {
             e.printStackTrace();
         } finally {
             try {
-                inbox.close();
-                store.close();
+                if (inbox != null)
+                    inbox.close();
+                if (store != null)
+                    store.close();
             } catch (MessagingException e) {
                 e.printStackTrace();
             }

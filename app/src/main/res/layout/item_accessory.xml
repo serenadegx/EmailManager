@@ -40,6 +40,7 @@
             android:layout_marginStart="10dp"
             android:maxLength="16"
             android:text="@{item.fileName}"
+            android:textColor="@android:color/black"
             android:textSize="12sp"
             app:layout_constraintLeft_toRightOf="@id/iv_file"
             app:layout_constraintTop_toTopOf="@id/iv_file" />
@@ -51,6 +52,7 @@
             android:layout_marginStart="10dp"
             android:text="@{item.size}"
             android:textSize="12sp"
+            android:textColor="@android:color/black"
             app:layout_constraintBottom_toBottomOf="@id/iv_file"
             app:layout_constraintLeft_toRightOf="@id/iv_file" />
 

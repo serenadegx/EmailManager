@@ -38,6 +38,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
+            android:textColor="@android:color/black"
             android:text="@{item.fileName}"
             app:layout_constraintLeft_toRightOf="@id/iv_file"
             app:layout_constraintTop_toTopOf="@id/iv_file" />
@@ -47,6 +48,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
+            android:textColor="@android:color/black"
             android:text="@{String.valueOf(item.size)}"
             app:layout_constraintBottom_toBottomOf="@id/iv_file"
             app:layout_constraintLeft_toRightOf="@id/iv_file" />
