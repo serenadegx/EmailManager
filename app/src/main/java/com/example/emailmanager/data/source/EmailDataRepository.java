@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.example.emailmanager.data.AccountDetail;
 import com.example.emailmanager.data.EmailDetail;
+import com.example.emailmanager.data.source.remote.EmailRemoteDataSource;
 
 import java.util.List;
 
@@ -41,12 +42,6 @@ public class EmailDataRepository implements EmailDataSource {
                 }
             });
         }
-    }
-
-    private void refreshLocalDataSource(List<EmailDetail> emails) {
-        mEmailLocalDataSource.deleteAll();
-        mEmailLocalDataSource.saveAll(emails);
-        isCache = false;
     }
 
     @Override
@@ -118,11 +113,11 @@ public class EmailDataRepository implements EmailDataSource {
     }
 
     public void loadSentMessage(AccountDetail account, GetEmailsCallBack callBack) {
-
+        ((EmailRemoteDataSource)mEmailRemoteDataSource).loadSentMessage(account, callBack);
     }
 
     public void loadDrafts(AccountDetail account, GetEmailsCallBack callBack) {
-
+        ((EmailRemoteDataSource)mEmailRemoteDataSource).loadDrafts(account, callBack);
     }
 
     private void getEmailsFromRemoteDataSource(AccountDetail detail, final GetEmailsCallBack callBack) {
@@ -139,5 +134,11 @@ public class EmailDataRepository implements EmailDataSource {
                 callBack.onDataNotAvailable();
             }
         });
+    }
+
+    private void refreshLocalDataSource(List<EmailDetail> emails) {
+        mEmailLocalDataSource.deleteAll();
+        mEmailLocalDataSource.saveAll(emails);
+        isCache = false;
     }
 }

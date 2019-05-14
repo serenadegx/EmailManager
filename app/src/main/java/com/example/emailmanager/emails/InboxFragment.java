@@ -1,6 +1,7 @@
 package com.example.emailmanager.emails;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,24 @@ public class InboxFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setupListAdapter();
+
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        binding = FragmentInboxBinding.inflate(inflater, container, false);
+        binding.rv.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.rv.addItemDecoration(new EMDecoration(getActivity(), EMDecoration.VERTICAL_LIST, R.drawable.list_divider, 0));
+        binding.srl.setOnRefreshListener(this);
+        viewModel = new EmailsViewModel(new EmailDataRepository(new EmailLocalDataSource(), new EmailRemoteDataSource()), getContext(), binding.srl);
+        binding.setViewModel(viewModel);
+
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onStart() {
         switch (getArguments().getInt(FLAG)) {
             case INBOX:
                 viewModel.loadEmails();
@@ -51,21 +70,9 @@ public class InboxFragment extends Fragment implements SwipeRefreshLayout.OnRefr
             default:
                 break;
         }
-
+        super.onStart();
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentInboxBinding.inflate(inflater, container, false);
-        binding.rv.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.rv.addItemDecoration(new EMDecoration(getActivity(), EMDecoration.VERTICAL_LIST, R.drawable.list_divider, 0));
-        binding.srl.setOnRefreshListener(this);
-        viewModel = new EmailsViewModel(new EmailDataRepository(new EmailLocalDataSource(),new EmailRemoteDataSource()), getContext(), binding.srl);
-        binding.setViewModel(viewModel);
-
-        return binding.getRoot();
-    }
 
     @Override
     public void onRefresh() {

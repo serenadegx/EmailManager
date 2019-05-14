@@ -95,8 +95,6 @@ public class EmailRemoteDataSource implements EmailDataSource {
                 InternetAddress address = (InternetAddress) message.getFrom()[0];
 
 
-
-
                 emailDetail.setFrom(address.getAddress());
                 emailDetail.setPersonal(address.getPersonal());
                 emailDetail.setSubject(message.getSubject());
@@ -436,7 +434,7 @@ public class EmailRemoteDataSource implements EmailDataSource {
             e.printStackTrace();
         } finally {
             try {
-                drafts.close();
+//                drafts.close();
                 store.close();
             } catch (MessagingException e) {
                 e.printStackTrace();
@@ -619,5 +617,113 @@ public class EmailRemoteDataSource implements EmailDataSource {
         sb.append(data.getContent());
         return new DataHandler(
                 new ByteArrayDataSource(sb.toString(), "text/html"));
+    }
+
+    public void loadSentMessage(final AccountDetail detail, GetEmailsCallBack callBack) {
+        List<EmailDetail> data = new ArrayList<>();
+        Properties props = System.getProperties();
+        props.put(detail.getEmail().getReceiveHostKey(), detail.getEmail().getReceiveHostValue());
+        props.put(detail.getEmail().getReceivePortKey(), detail.getEmail().getReceivePortValue());
+        props.put(detail.getEmail().getReceiveEncryptKey(), detail.getEmail().getReceiveEncryptValue());
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(
+                        detail.getAccount(), detail.getPwd());
+            }
+        });
+//        session.setDebug(true);
+        Store store = null;
+        Folder inbox = null;
+        try {
+            store = session.getStore(detail.getEmail().getReceiveProtocol());
+            store.connect();
+            inbox = store.getFolder("Sent Messages");
+            inbox.open(Folder.READ_ONLY);
+            Message[] messages = inbox.getMessages();
+            for (Message message : messages) {
+                InternetAddress address = (InternetAddress) message.getFrom()[0];
+                InternetAddress to = (InternetAddress) message.getRecipients(Message.RecipientType.TO)[0];
+                StringBuilder sb = new StringBuilder();
+                for (Address toAddress : message.getRecipients(Message.RecipientType.TO)) {
+                    sb.append(((InternetAddress) toAddress).getPersonal() + ",");
+                }
+                sb.replace(sb.length() - 1, sb.length(), "");
+                EmailDetail emailDetail = new EmailDetail((long) message.getMessageNumber(), message.getSubject(),
+                        dateFormat(message.getReceivedDate()), sb.toString());
+                //发件箱默认已读
+                emailDetail.setRead(true);
+                data.add(emailDetail);
+            }
+            Collections.reverse(data);
+            callBack.onEmailsLoaded(data);
+        } catch (NoSuchProviderException e) {
+            callBack.onDataNotAvailable();
+            e.printStackTrace();
+        } catch (MessagingException e) {
+            callBack.onDataNotAvailable();
+            e.printStackTrace();
+        } finally {
+            try {
+                inbox.close();
+                store.close();
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void loadDrafts(final AccountDetail detail, GetEmailsCallBack callBack) {
+        List<EmailDetail> data = new ArrayList<>();
+        Properties props = System.getProperties();
+        props.put(detail.getEmail().getReceiveHostKey(), detail.getEmail().getReceiveHostValue());
+        props.put(detail.getEmail().getReceivePortKey(), detail.getEmail().getReceivePortValue());
+        props.put(detail.getEmail().getReceiveEncryptKey(), detail.getEmail().getReceiveEncryptValue());
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(
+                        detail.getAccount(), detail.getPwd());
+            }
+        });
+//        session.setDebug(true);
+        Store store = null;
+        Folder inbox = null;
+        try {
+            store = session.getStore(detail.getEmail().getReceiveProtocol());
+            store.connect();
+            inbox = store.getFolder("Drafts");
+            inbox.open(Folder.READ_ONLY);
+            Message[] messages = inbox.getMessages();
+            for (Message message : messages) {
+                InternetAddress address = (InternetAddress) message.getFrom()[0];
+                InternetAddress to = (InternetAddress) message.getRecipients(Message.RecipientType.TO)[0];
+                StringBuilder sb = new StringBuilder();
+                for (Address toAddress : message.getRecipients(Message.RecipientType.TO)) {
+                    sb.append(((InternetAddress) toAddress).getPersonal() + ",");
+                }
+                sb.replace(sb.length() - 1, sb.length(), "");
+                EmailDetail emailDetail = new EmailDetail((long) message.getMessageNumber(), message.getSubject(),
+                        dateFormat(message.getReceivedDate()), sb.toString());
+                //发件箱默认已读
+                emailDetail.setRead(true);
+                data.add(emailDetail);
+            }
+            Collections.reverse(data);
+            callBack.onEmailsLoaded(data);
+        } catch (NoSuchProviderException e) {
+            callBack.onDataNotAvailable();
+            e.printStackTrace();
+        } catch (MessagingException e) {
+            callBack.onDataNotAvailable();
+            e.printStackTrace();
+        } finally {
+            try {
+                inbox.close();
+                store.close();
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

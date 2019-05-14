@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-//        ((TextView) headerView.findViewById(R.id.textView)).setText(EMApplication.getAccount().getAccount());
+        ((TextView) headerView.findViewById(R.id.textView)).setText(EMApplication.getAccount().getAccount());
         headerView.findViewById(R.id.tv_switch).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

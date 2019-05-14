@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,7 +42,7 @@ public class SendMsgActivity extends AppCompatActivity {
         AccessoryListAdapter listAdapter = new AccessoryListAdapter(this);
         binding.rvAccessory.setAdapter(listAdapter);
         viewModel = new SendMsgViewModel(this, new EmailDataRepository(new EmailLocalDataSource()
-                ,new EmailRemoteDataSource()), (EmailDetail) getIntent().getSerializableExtra("detail"),binding);
+                , new EmailRemoteDataSource()), (EmailDetail) getIntent().getSerializableExtra("detail"), binding);
         viewModel.setAdapter(listAdapter);
         binding.setViewModel(viewModel);
     }
@@ -82,7 +84,7 @@ public class SendMsgActivity extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");//设置类型，我这里是任意类型，任意后缀的可以这样写。
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        startActivityForResult(intent,1);
+        startActivityForResult(intent, 1);
     }
 
     @Override

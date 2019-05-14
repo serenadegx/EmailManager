@@ -468,7 +468,6 @@ public class EmailRepository {
             e.printStackTrace();
         } finally {
             try {
-                drafts.close();
                 store.close();
             } catch (MessagingException e) {
                 e.printStackTrace();
