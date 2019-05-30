@@ -35,11 +35,14 @@
 
         <TextView
             android:id="@+id/tv_filename"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:textColor="@android:color/black"
             android:text="@{item.fileName}"
+            android:textSize="14sp"
+            android:ellipsize="end"
+            android:maxLines="1"
             app:layout_constraintLeft_toRightOf="@id/iv_file"
             app:layout_constraintTop_toTopOf="@id/iv_file" />
 

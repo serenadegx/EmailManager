@@ -8,6 +8,7 @@ import com.example.emailmanager.account.EmailCategoryActivity;
 import com.example.emailmanager.data.AccountDetail;
 import com.example.emailmanager.data.AccountDetailDao;
 import com.example.emailmanager.data.Email;
+import com.example.emailmanager.databinding.ActivitySplashBinding;
 
 import org.greenrobot.greendao.query.QueryBuilder;
 
@@ -21,7 +22,7 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        DataBindingUtil.setContentView(this, R.layout.activity_splash);
+        ActivitySplashBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_splash);
         initData();
         QueryBuilder<AccountDetail> queryBuilder = EMApplication.getDaoSession().getAccountDetailDao().queryBuilder().where(AccountDetailDao.Properties.IsCur.eq("true"));
         final List<AccountDetail> accounts = queryBuilder.list();

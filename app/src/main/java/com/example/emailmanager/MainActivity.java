@@ -23,6 +23,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private InboxFragment inboxFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,7 +59,7 @@ public class MainActivity extends AppCompatActivity
 
         navigationView.setNavigationItemSelectedListener(this);
         Bundle bundle = new Bundle();
-        InboxFragment inboxFragment = new InboxFragment();
+        inboxFragment = new InboxFragment();
         bundle.putInt(InboxFragment.FLAG, InboxFragment.INBOX);
         inboxFragment.setArguments(bundle);
         getSupportFragmentManager().beginTransaction().replace(R.id.fl_contain, inboxFragment).commit();
@@ -108,19 +110,22 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        Bundle bundle = new Bundle();
-        InboxFragment inboxFragment = new InboxFragment();
+//        Bundle bundle = new Bundle();
+//        InboxFragment inboxFragment = new InboxFragment();
         if (id == R.id.nav_inbox) {
-            bundle.putInt(InboxFragment.FLAG, InboxFragment.INBOX);
+            inboxFragment.setLoadType(InboxFragment.INBOX);
+//            bundle.putInt(InboxFragment.FLAG, InboxFragment.INBOX);
         } else if (id == R.id.nav_drafts) {
-            bundle.putInt(InboxFragment.FLAG, InboxFragment.DRAFTS);
+            inboxFragment.setLoadType(InboxFragment.DRAFTS);
+//            bundle.putInt(InboxFragment.FLAG, InboxFragment.DRAFTS);
         } else if (id == R.id.nav_send) {
-            bundle.putInt(InboxFragment.FLAG, InboxFragment.SENT_MESSAGES);
+            inboxFragment.setLoadType(InboxFragment.SENT_MESSAGES);
+//            bundle.putInt(InboxFragment.FLAG, InboxFragment.SENT_MESSAGES);
         } else if (id == R.id.nav_delete) {
 
         }
-        inboxFragment.setArguments(bundle);
-        getSupportFragmentManager().beginTransaction().replace(R.id.fl_contain, inboxFragment).commit();
+//        inboxFragment.setArguments(bundle);
+//        getSupportFragmentManager().beginTransaction().replace(R.id.fl_contain, inboxFragment).commit();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

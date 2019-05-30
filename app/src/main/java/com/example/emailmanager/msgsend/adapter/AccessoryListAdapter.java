@@ -9,6 +9,8 @@ import com.example.emailmanager.data.AccessoryDetail;
 import com.example.emailmanager.utils.BaseAdapter;
 import com.example.emailmanager.utils.BaseViewHolder;
 
+import java.util.List;
+
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
@@ -34,6 +36,11 @@ public class AccessoryListAdapter extends BaseAdapter<AccessoryDetail, BaseViewH
 
     public void delete(AccessoryDetail item, int position) {
         mData.remove(position);
+        notifyDataSetChanged();
+    }
+
+    public void add(List<AccessoryDetail> data) {
+        mData.addAll(data);
         notifyDataSetChanged();
     }
 }

@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,11 +12,11 @@ import android.view.View;
 import com.example.emailmanager.R;
 import com.example.emailmanager.data.EmailDetail;
 import com.example.emailmanager.data.source.EmailDataRepository;
-import com.example.emailmanager.data.source.EmailRepository;
 import com.example.emailmanager.data.source.local.EmailLocalDataSource;
 import com.example.emailmanager.data.source.remote.EmailRemoteDataSource;
 import com.example.emailmanager.databinding.ActivityMsgSendBinding;
 import com.example.emailmanager.msgsend.adapter.AccessoryListAdapter;
+import com.example.multifile.XRMultiFile;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -81,10 +79,11 @@ public class SendMsgActivity extends AppCompatActivity {
     }
 
     private void openFile() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("*/*");//设置类型，我这里是任意类型，任意后缀的可以这样写。
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        startActivityForResult(intent, 1);
+        XRMultiFile.get()
+                .with(this)
+                .lookHiddenFile(false)
+                .limit(3)
+                .select(this, 715);
     }
 
     @Override

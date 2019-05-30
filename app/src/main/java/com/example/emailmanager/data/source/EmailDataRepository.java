@@ -10,7 +10,7 @@ import java.util.List;
 
 public class EmailDataRepository implements EmailDataSource {
 
-    private boolean isCache;
+    private boolean isCache = true;
 
     private EmailDataSource mEmailLocalDataSource;
 
@@ -21,13 +21,13 @@ public class EmailDataRepository implements EmailDataSource {
         this.mEmailRemoteDataSource = mEmailRemoteDataSource;
     }
 
-    public void refreshEmails() {
-        isCache = true;
+    public void refreshEmails(boolean cache) {
+        isCache = cache;
     }
 
     @Override
     public void getEmails(final AccountDetail detail, final GetEmailsCallBack callBack) {
-        if (isCache) {
+        if (!isCache) {
             getEmailsFromRemoteDataSource(detail, callBack);
         } else {
             mEmailLocalDataSource.getEmails(detail, new GetEmailsCallBack() {
@@ -139,6 +139,6 @@ public class EmailDataRepository implements EmailDataSource {
     private void refreshLocalDataSource(List<EmailDetail> emails) {
         mEmailLocalDataSource.deleteAll();
         mEmailLocalDataSource.saveAll(emails);
-        isCache = false;
+        isCache = true;
     }
 }

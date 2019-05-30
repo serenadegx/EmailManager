@@ -6,20 +6,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListPopupWindow;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.emailmanager.EMApplication;
@@ -28,28 +24,20 @@ import com.example.emailmanager.data.Contacts;
 import com.example.emailmanager.data.EmailDetail;
 import com.example.emailmanager.data.source.EmailDataRepository;
 import com.example.emailmanager.data.source.EmailDataSource;
-import com.example.emailmanager.data.source.EmailRepository;
 import com.example.emailmanager.databinding.ActivityMsgSendBinding;
 import com.example.emailmanager.msgsend.adapter.AccessoryListAdapter;
+import com.example.multifile.XRMultiFile;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.activation.DataHandler;
-import javax.mail.Address;
-import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.util.ByteArrayDataSource;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.databinding.ObservableField;
+
+import static android.app.Activity.RESULT_OK;
 
 public class SendMsgViewModel {
     private static final int SUCCESS = 1;
@@ -261,13 +249,18 @@ public class SendMsgViewModel {
     }
 
     void handleOnActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1) {
-            Uri uri = data.getData();
-            Log.i("mango", "path:" + uri.getPath() + "    Scheme:" + uri.getScheme());
-            String path = getPath(mContext, uri);
-            mAccessory.add(new AccessoryDetail(getFileName(path), path, getPrintSize(path)));
-            mAdapter.refreshData(mAccessory);
-        }
+            if (requestCode == 715 && data != null) {
+                ArrayList<String> list = XRMultiFile.getSelectResult(data);
+                for (String str : list) {
+                    Log.i("mango", str);
+                    AccessoryDetail accessory = new AccessoryDetail();
+                    accessory.setPath(str);
+                    accessory.setFileName(str.substring(str.lastIndexOf("/`") + 1));
+                    accessory.setSize(getPrintSize(str));
+                    mAdapter.mData.add(accessory);
+                }
+                mAdapter.notifyDataSetChanged();
+            }
     }
 
     public TextWatcher watcherReceiver = new TextWatcher() {
@@ -397,27 +390,29 @@ public class SendMsgViewModel {
     }
 
     public static String getPath(Context context, Uri uri) {
+        String path = null;
         if ("content".equalsIgnoreCase(uri.getScheme())) {
             String[] projection = {"_data"};
             Cursor cursor = null;
             try {
                 cursor = context.getContentResolver().query(uri, projection, null, null, null);
 //                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                if (cursor != null && cursor.moveToFirst()) { final int column_index = cursor.getColumnIndexOrThrow("_data");
-                    return cursor.getString(column_index);
+                if (cursor != null && cursor.moveToFirst()) {
+                    int column_index = cursor.getColumnIndexOrThrow("_data");
+                    path = cursor.getString(column_index);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
+            } /*finally {
                 if (cursor != null)
                     cursor.close();
-            }
+            }*/
         } else if ("file".equalsIgnoreCase(uri.getScheme())) {
-            return uri.getPath();
+            path = uri.getPath();
         } else {
-            return uri.getPath();
+            path = uri.getPath();
         }
-        return null;
+        return path;
     }
 
     public static String getFileName(String path) {
