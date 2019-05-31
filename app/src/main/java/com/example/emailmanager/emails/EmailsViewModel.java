@@ -187,7 +187,7 @@ public class EmailsViewModel extends BaseObservable {
         this.loadTYpe = type;
     }
 
-    public void setRefresh(boolean isRefresh){
+    public void setRefresh(boolean isRefresh) {
         mEmailRepository.refreshEmails(isRefresh);
     }
 }

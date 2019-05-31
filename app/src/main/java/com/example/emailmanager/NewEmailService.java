@@ -143,7 +143,7 @@ public class NewEmailService extends Service {
                         .setContentIntent(pendingIntent);
                 notification = notificationBuilder.build();
             }
-//            notification.flags |= Notification.FLAG_AUTO_CANCEL;
+            notification.flags |= Notification.FLAG_AUTO_CANCEL;
             notificationManager.notify(message.getMessageNumber(), notification);
         }
 

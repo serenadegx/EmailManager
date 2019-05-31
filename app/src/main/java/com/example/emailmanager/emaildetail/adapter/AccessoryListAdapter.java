@@ -17,6 +17,7 @@ import com.example.emailmanager.R;
 import com.example.emailmanager.data.AccessoryDetail;
 import com.example.emailmanager.utils.BaseAdapter;
 import com.example.emailmanager.utils.BaseViewHolder;
+import com.example.multifile.XRMultiFile;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -94,7 +95,8 @@ public class AccessoryListAdapter extends BaseAdapter<AccessoryDetail, BaseViewH
             if (!item.isDownload()) {
                 realDownloadOrOpen();
             } else {
-                Toast.makeText(mContext, "/EmailManager/" + item.getFileName(), Toast.LENGTH_LONG).show();
+//                Toast.makeText(mContext, "/EmailManager/" + item.getFileName(), Toast.LENGTH_LONG).show();
+                XRMultiFile.get().with(mContext).custom(new File(Environment.getExternalStorageDirectory(),"/EmailManager")).browse();
             }
         } else {
             ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSIONS);
