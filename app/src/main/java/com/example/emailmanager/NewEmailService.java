@@ -3,6 +3,7 @@ package com.example.emailmanager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
@@ -115,6 +116,12 @@ public class NewEmailService extends Service {
     }
 
     public void notifyNewEmail(Message[] messages) throws MessagingException {
+        Intent intent = new Intent(getBaseContext(),
+                MainActivity.class);
+        intent.putExtra("isRefresh",true);
+        PendingIntent pendingIntent = PendingIntent.getService(
+                getBaseContext(), 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
         for (Message message : messages) {
             NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             Notification notification = null;
@@ -125,15 +132,18 @@ public class NewEmailService extends Service {
                         .setChannelId(message.getMessageNumber() + "")
                         .setContentTitle(((InternetAddress) message.getFrom()[0]).getAddress())
                         .setContentText(message.getSubject())
+                        .setContentIntent(pendingIntent)
                         .setSmallIcon(R.mipmap.ic_launcher).build();
             } else {
                 NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                         .setContentTitle(((InternetAddress) message.getFrom()[0]).getAddress())
                         .setContentText(message.getSubject())
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setOngoing(true);//无效
+                        .setOngoing(true)//无效
+                        .setContentIntent(pendingIntent);
                 notification = notificationBuilder.build();
             }
+//            notification.flags |= Notification.FLAG_AUTO_CANCEL;
             notificationManager.notify(message.getMessageNumber(), notification);
         }
 

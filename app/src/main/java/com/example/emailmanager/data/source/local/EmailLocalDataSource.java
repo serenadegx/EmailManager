@@ -13,6 +13,25 @@ import java.util.Collections;
 import java.util.List;
 
 public class EmailLocalDataSource implements EmailDataSource {
+    public static EmailLocalDataSource INSTANCE;
+
+    private EmailDetailDao mEmailDetailDao;
+
+    private EmailLocalDataSource(EmailDetailDao emailDetailDao) {
+        this.mEmailDetailDao = emailDetailDao;
+    }
+
+    public static EmailLocalDataSource getInstance(EmailDetailDao emailDetailDao) {
+        if (INSTANCE == null) {
+            synchronized (EmailLocalDataSource.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new EmailLocalDataSource(emailDetailDao);
+                }
+            }
+        }
+        return INSTANCE;
+    }
+
     @Override
     public void getEmails(AccountDetail detail, GetEmailsCallBack callBack) {
         List<EmailDetail> local = EMApplication.getDaoSession().getEmailDetailDao()

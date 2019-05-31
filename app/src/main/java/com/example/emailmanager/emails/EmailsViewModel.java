@@ -3,7 +3,6 @@ package com.example.emailmanager.emails;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.example.emailmanager.BR;
@@ -186,5 +185,9 @@ public class EmailsViewModel extends BaseObservable {
 
     public void setLoadType(int type) {
         this.loadTYpe = type;
+    }
+
+    public void setRefresh(boolean isRefresh){
+        mEmailRepository.refreshEmails(isRefresh);
     }
 }

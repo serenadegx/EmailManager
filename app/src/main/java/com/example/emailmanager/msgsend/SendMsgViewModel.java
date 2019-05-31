@@ -35,7 +35,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.databinding.ObservableArrayList;
 import androidx.databinding.ObservableField;
+import androidx.databinding.ObservableList;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -45,7 +47,7 @@ public class SendMsgViewModel {
     private static final int SAVE_SUCCESS = 3;
     private static final int FORWARD_SUCCESS = 4;
     private static final int REPLY_SUCCESS = 5;
-
+    public final ObservableList<AccessoryDetail> mItems = new ObservableArrayList<>();
     public final ObservableField<String> receiver = new ObservableField<>();
     public final ObservableField<String> copy = new ObservableField<>();
     public final ObservableField<String> secret = new ObservableField<>();
@@ -127,7 +129,7 @@ public class SendMsgViewModel {
         data.setBcc(TextUtils.isEmpty(secret.get()) ? null : secret.get());
         data.setSubject(subject.get());
         data.setContent(content.get());
-        data.setAccessoryList(mAccessory);
+        data.setAccessoryList(mAdapter.mData);
         new Thread() {
             @Override
             public void run() {
@@ -249,18 +251,18 @@ public class SendMsgViewModel {
     }
 
     void handleOnActivityResult(int requestCode, int resultCode, Intent data) {
-            if (requestCode == 715 && data != null) {
-                ArrayList<String> list = XRMultiFile.getSelectResult(data);
-                for (String str : list) {
-                    Log.i("mango", str);
-                    AccessoryDetail accessory = new AccessoryDetail();
-                    accessory.setPath(str);
-                    accessory.setFileName(str.substring(str.lastIndexOf("/`") + 1));
-                    accessory.setSize(getPrintSize(str));
-                    mAdapter.mData.add(accessory);
-                }
-                mAdapter.notifyDataSetChanged();
+        if (requestCode == 715 && data != null) {
+            ArrayList<String> list = XRMultiFile.getSelectResult(data);
+            for (String str : list) {
+                Log.i("mango", str);
+                AccessoryDetail accessory = new AccessoryDetail();
+                accessory.setPath(str);
+                accessory.setFileName(str.substring(str.lastIndexOf("/") + 1));
+                accessory.setSize(getPrintSize(str));
+//                mAdapter.mData.add(accessory);
+                mItems.add(accessory);
             }
+        }
     }
 
     public TextWatcher watcherReceiver = new TextWatcher() {
@@ -331,6 +333,11 @@ public class SendMsgViewModel {
         }
     };
 
+    public void delete(AccessoryDetail item, int position) {
+        Log.i("mango","delete");
+        mItems.remove(position);
+    }
+
     private void showFilterContacts(String str, View view, final ObservableField<String> ob) {
 
         final List<Contacts> contacts = new ArrayList<>();
@@ -382,41 +389,6 @@ public class SendMsgViewModel {
             popupWindow.show();
         }
 
-    }
-
-    public void setAdapter(AccessoryListAdapter listAdapter) {
-        this.mAdapter = listAdapter;
-        mAdapter.refreshData(mAccessory);
-    }
-
-    public static String getPath(Context context, Uri uri) {
-        String path = null;
-        if ("content".equalsIgnoreCase(uri.getScheme())) {
-            String[] projection = {"_data"};
-            Cursor cursor = null;
-            try {
-                cursor = context.getContentResolver().query(uri, projection, null, null, null);
-//                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                if (cursor != null && cursor.moveToFirst()) {
-                    int column_index = cursor.getColumnIndexOrThrow("_data");
-                    path = cursor.getString(column_index);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } /*finally {
-                if (cursor != null)
-                    cursor.close();
-            }*/
-        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
-            path = uri.getPath();
-        } else {
-            path = uri.getPath();
-        }
-        return path;
-    }
-
-    public static String getFileName(String path) {
-        return path.substring(path.lastIndexOf("/") + 1);
     }
 
     public static long getSize(String path) {

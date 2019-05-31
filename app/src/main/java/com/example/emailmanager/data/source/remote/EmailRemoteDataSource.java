@@ -42,6 +42,22 @@ import javax.mail.internet.MimeUtility;
 import javax.mail.util.ByteArrayDataSource;
 
 public class EmailRemoteDataSource implements EmailDataSource {
+    private static EmailRemoteDataSource INSTANCE;
+
+    private EmailRemoteDataSource() {
+    }
+
+    public static EmailRemoteDataSource getInstance() {
+        if (INSTANCE == null) {
+            synchronized (EmailRemoteDataSource.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new EmailRemoteDataSource();
+                }
+            }
+        }
+        return INSTANCE;
+    }
+
     @Override
     public void getEmails(final AccountDetail detail, GetEmailsCallBack callBack) {
         List<EmailDetail> data = new ArrayList<>();
@@ -500,7 +516,7 @@ public class EmailRemoteDataSource implements EmailDataSource {
     public static void dumpPart(Part p, EmailDetail data) {
         try {
             if (p.isMimeType("text/plain")) {
-                System.out.println((String) p.getContent());
+//                System.out.println((String) p.getContent());
             } else if (p.isMimeType("multipart/*")) {
                 if (p.isMimeType("multipart/report")) {
                     //                MimeMessage cmsg = new MimeMessage((MimeMessage) p);

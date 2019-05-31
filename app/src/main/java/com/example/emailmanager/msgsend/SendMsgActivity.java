@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.example.emailmanager.R;
+import com.example.emailmanager.data.AccessoryDetail;
 import com.example.emailmanager.data.EmailDetail;
 import com.example.emailmanager.data.source.EmailDataRepository;
 import com.example.emailmanager.data.source.local.EmailLocalDataSource;
@@ -30,19 +31,30 @@ public class SendMsgActivity extends AppCompatActivity {
     public static final int REPLY_ALL = 4;
 
     private SendMsgViewModel viewModel;
+    private AccessoryListAdapter listAdapter;
+    private ActivityMsgSendBinding binding;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActivityMsgSendBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_msg_send);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_msg_send);
         initToolbar(binding);
         binding.rvAccessory.setLayoutManager(new LinearLayoutManager(this));
-        AccessoryListAdapter listAdapter = new AccessoryListAdapter(this);
-        binding.rvAccessory.setAdapter(listAdapter);
-        viewModel = new SendMsgViewModel(this, new EmailDataRepository(new EmailLocalDataSource()
-                , new EmailRemoteDataSource()), (EmailDetail) getIntent().getSerializableExtra("detail"), binding);
-        viewModel.setAdapter(listAdapter);
+        initAdapter();
+        viewModel = new SendMsgViewModel(this, EmailDataRepository.provideRepository(),
+                (EmailDetail) getIntent().getSerializableExtra("detail"), binding);
         binding.setViewModel(viewModel);
+    }
+
+    private void initAdapter() {
+        listAdapter = new AccessoryListAdapter(this);
+        binding.rvAccessory.setAdapter(listAdapter);
+        listAdapter.setRemoveAccessoryListener(new AccessoryListAdapter.RemoveAccessoryListener() {
+            @Override
+            public void onRemoveListener(AccessoryDetail item, int position) {
+                viewModel.delete(item, position);
+            }
+        });
     }
 
     @Override

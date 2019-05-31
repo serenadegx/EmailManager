@@ -2,13 +2,18 @@ package com.example.emailmanager.data.source;
 
 import android.util.Log;
 
+import com.example.emailmanager.EMApplication;
 import com.example.emailmanager.data.AccountDetail;
+import com.example.emailmanager.data.EmailDao;
 import com.example.emailmanager.data.EmailDetail;
+import com.example.emailmanager.data.EmailDetailDao;
+import com.example.emailmanager.data.source.local.EmailLocalDataSource;
 import com.example.emailmanager.data.source.remote.EmailRemoteDataSource;
 
 import java.util.List;
 
 public class EmailDataRepository implements EmailDataSource {
+    private static EmailDataRepository INSTANCE;
 
     private boolean isCache = true;
 
@@ -16,9 +21,18 @@ public class EmailDataRepository implements EmailDataSource {
 
     private EmailDataSource mEmailRemoteDataSource;
 
-    public EmailDataRepository(EmailDataSource mEmailLocalDataSource, EmailDataSource mEmailRemoteDataSource) {
+    private EmailDataRepository(EmailDataSource mEmailLocalDataSource, EmailDataSource mEmailRemoteDataSource) {
         this.mEmailLocalDataSource = mEmailLocalDataSource;
         this.mEmailRemoteDataSource = mEmailRemoteDataSource;
+    }
+
+    public static EmailDataRepository provideRepository() {
+        if (INSTANCE == null) {
+            EmailDetailDao emailDao = EMApplication.getDaoSession().getEmailDetailDao();
+            INSTANCE = new EmailDataRepository(EmailLocalDataSource.getInstance(emailDao),
+                    EmailRemoteDataSource.getInstance());
+        }
+        return INSTANCE;
     }
 
     public void refreshEmails(boolean cache) {
@@ -113,11 +127,11 @@ public class EmailDataRepository implements EmailDataSource {
     }
 
     public void loadSentMessage(AccountDetail account, GetEmailsCallBack callBack) {
-        ((EmailRemoteDataSource)mEmailRemoteDataSource).loadSentMessage(account, callBack);
+        ((EmailRemoteDataSource) mEmailRemoteDataSource).loadSentMessage(account, callBack);
     }
 
     public void loadDrafts(AccountDetail account, GetEmailsCallBack callBack) {
-        ((EmailRemoteDataSource)mEmailRemoteDataSource).loadDrafts(account, callBack);
+        ((EmailRemoteDataSource) mEmailRemoteDataSource).loadDrafts(account, callBack);
     }
 
     private void getEmailsFromRemoteDataSource(AccountDetail detail, final GetEmailsCallBack callBack) {

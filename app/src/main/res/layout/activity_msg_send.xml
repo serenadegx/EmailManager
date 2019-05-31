@@ -225,16 +225,17 @@
                     android:background="@android:color/darker_gray" />
 
                 <androidx.recyclerview.widget.RecyclerView
-                    tools:listitem="@layout/item_accessory_send"
                     android:id="@+id/rv_accessory"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:items="@{viewModel.mItems}"
+                    tools:listitem="@layout/item_accessory_send" />
 
                 <EditText
-                    android:gravity="left"
-                    android:padding="10dp"
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
+                    android:gravity="left"
+                    android:padding="10dp"
                     android:text="@={viewModel.content}" />
             </LinearLayout>
         </ScrollView>

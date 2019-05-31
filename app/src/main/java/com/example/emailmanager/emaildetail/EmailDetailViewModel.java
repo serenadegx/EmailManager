@@ -21,7 +21,6 @@ import com.example.emailmanager.data.AccessoryDetail;
 import com.example.emailmanager.data.EmailDetail;
 import com.example.emailmanager.data.source.EmailDataRepository;
 import com.example.emailmanager.data.source.EmailDataSource;
-import com.example.emailmanager.data.source.EmailRepository;
 import com.example.emailmanager.emaildetail.adapter.AccessoryListAdapter;
 import com.example.emailmanager.msgsend.SendMsgActivity;
 import com.example.xrwebviewlibrary.XRWebView;
@@ -30,16 +29,19 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 import androidx.core.content.ContextCompat;
+import androidx.databinding.ObservableArrayList;
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
+import androidx.databinding.ObservableList;
 
 public class EmailDetailViewModel {
     private static final int DELETE_SUCCESS = 1;
     private static final int DELETE_ERROR = 2;
     private static final int SUCCESS = 3;
     private static final int ERROR = 6;
-    private static final int READ_SUCCESS = 4;
-    private static final int READ_ERROR = 5;
+//    private static final int READ_SUCCESS = 4;
+//    private static final int READ_ERROR = 5;
+    public ObservableList<AccessoryDetail> mItems = new ObservableArrayList<>();
     public final ObservableField<String> receivers = new ObservableField<>();
     public final ObservableField<String> cc = new ObservableField<>();
     public final ObservableField<String> bcc = new ObservableField<>();
@@ -52,7 +54,6 @@ public class EmailDetailViewModel {
     private final long msgNum;
     private Context mContext;
     private EmailDataRepository mEmailRepository;
-    private AccessoryListAdapter adapter;
     private WebView webview;
     private EmailDetail detail;
     private Handler mHandler = new Handler() {
@@ -78,8 +79,7 @@ public class EmailDetailViewModel {
                 for (AccessoryDetail accessory : detail.getAccessoryList()) {
                     accessory.setDownload(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/EmailManager", accessory.getFileName()).exists());
                 }
-                adapter.refreshData(detail.getAccessoryList());
-
+                mItems.addAll(detail.getAccessoryList());
                 XRWebView.with(webview).simple().build().loadHtml(detail.getContent(), "text/html", "utf-8");
             } else if (msg.what == DELETE_SUCCESS) {
                 Toast.makeText(mContext, "删除成功", Toast.LENGTH_SHORT).show();
@@ -128,27 +128,6 @@ public class EmailDetailViewModel {
         this.webview = webView;
     }
 
-    public void setAdapter(AccessoryListAdapter listAdapter) {
-        this.adapter = listAdapter;
-    }
-
-    private void saveHtml(EmailDetail emailDetail) {
-        try {
-            FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory()
-                    .getAbsolutePath(), emailDetail.getSubject() + emailDetail.getId() + ".html"));
-            fos.write(emailDetail.getContent().getBytes());
-            fos.close();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        Message message = Message.obtain();
-        message.what = 1001;
-        message.obj = new File(Environment.getExternalStorageDirectory()
-                .getAbsolutePath(), emailDetail.getSubject() + emailDetail.getId() + ".html").getAbsolutePath();
-        mHandler.sendMessage(message);
-    }
-
     public void reply(View v) {
         SendMsgActivity.start2SendMsgActivity(mContext, detail, SendMsgActivity.REPLY);
     }
@@ -182,47 +161,26 @@ public class EmailDetailViewModel {
 
     }
 
-    void handleRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (checkPermission(mContext, permissions)) {
-            adapter.realDownloadOrOpen();
-        } else {
-            new AlertDialog.Builder(mContext)
-                    .setTitle("提示信息")
-                    .setMessage("缺少必要权限，会造成app部分功能无法使用。如若需要，请单击【确定】按钮前往设置中心进行权限授权。")
-                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                        }
-                    })
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            startAppSettings();
-                        }
-                    }).show();
-        }
-    }
-
-    private boolean checkPermission(Context context, String[] permissions) {
-        boolean flag = true;
-        for (int i = 0; i < permissions.length; i++) {
-            if (ContextCompat.checkSelfPermission(context, permissions[i]) != PackageManager.PERMISSION_GRANTED) {
-                flag = !flag;
-                break;
-            }
-
-        }
-        return flag;
-    }
-
-    /**
-     * 跳到app权限设置界面
-     */
-    private void startAppSettings() {
-        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        intent.setData(Uri.parse("package:" + mContext.getPackageName()));
-        mContext.startActivity(intent);
-    }
+//    void handleRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+//        if (checkPermission(mContext, permissions)) {
+////            adapter.realDownloadOrOpen();
+//        } else {
+//            new AlertDialog.Builder(mContext)
+//                    .setTitle("提示信息")
+//                    .setMessage("缺少必要权限，会造成app部分功能无法使用。如若需要，请单击【确定】按钮前往设置中心进行权限授权。")
+//                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialog, int which) {
+//                        }
+//                    })
+//                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialog, int which) {
+//                            startAppSettings();
+//                        }
+//                    }).show();
+//        }
+//    }
 
     private void realDelete() {
         new Thread() {
@@ -244,5 +202,22 @@ public class EmailDetailViewModel {
                 });
             }
         }.start();
+    }
+
+    private void saveHtml(EmailDetail emailDetail) {
+        try {
+            FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory()
+                    .getAbsolutePath(), emailDetail.getSubject() + emailDetail.getId() + ".html"));
+            fos.write(emailDetail.getContent().getBytes());
+            fos.close();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        Message message = Message.obtain();
+        message.what = 1001;
+        message.obj = new File(Environment.getExternalStorageDirectory()
+                .getAbsolutePath(), emailDetail.getSubject() + emailDetail.getId() + ".html").getAbsolutePath();
+        mHandler.sendMessage(message);
     }
 }

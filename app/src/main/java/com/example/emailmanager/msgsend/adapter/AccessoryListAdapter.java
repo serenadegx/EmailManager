@@ -35,12 +35,22 @@ public class AccessoryListAdapter extends BaseAdapter<AccessoryDetail, BaseViewH
     }
 
     public void delete(AccessoryDetail item, int position) {
-        mData.remove(position);
-        notifyDataSetChanged();
+        if (removeAccessoryListener!=null)
+            removeAccessoryListener.onRemoveListener(item, position);
     }
 
     public void add(List<AccessoryDetail> data) {
         mData.addAll(data);
         notifyDataSetChanged();
+    }
+
+    private RemoveAccessoryListener removeAccessoryListener;
+
+    public void setRemoveAccessoryListener(RemoveAccessoryListener removeAccessoryListener) {
+        this.removeAccessoryListener = removeAccessoryListener;
+    }
+
+    public interface RemoveAccessoryListener{
+        void onRemoveListener(AccessoryDetail item, int position);
     }
 }

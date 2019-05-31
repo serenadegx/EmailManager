@@ -162,6 +162,7 @@
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv_accessory"
+                        android:items="@{viewModel.mItems}"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="6dp"

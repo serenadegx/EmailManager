@@ -1,16 +1,12 @@
 package com.example.emailmanager.emails;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.emailmanager.R;
 import com.example.emailmanager.data.source.EmailDataRepository;
-import com.example.emailmanager.data.source.EmailRepository;
-import com.example.emailmanager.data.source.local.EmailLocalDataSource;
-import com.example.emailmanager.data.source.remote.EmailRemoteDataSource;
 import com.example.emailmanager.databinding.FragmentInboxBinding;
 import com.example.emailmanager.emails.adapter.EmailListAdapter;
 import com.example.emailmanager.utils.EMDecoration;
@@ -19,12 +15,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
-import static java.security.AccessController.getContext;
 
 public class InboxFragment extends Fragment {
     public static final String FLAG = "flag";
+    public static final String REFRESH = "refresh";
     public static final int INBOX = 1;
     public static final int SENT_MESSAGES = 2;
     public static final int DRAFTS = 3;
@@ -45,7 +39,8 @@ public class InboxFragment extends Fragment {
         binding = FragmentInboxBinding.inflate(inflater, container, false);
         binding.rv.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.rv.addItemDecoration(new EMDecoration(getActivity(), EMDecoration.VERTICAL_LIST, R.drawable.list_divider, 0));
-        viewModel = new EmailsViewModel(new EmailDataRepository(new EmailLocalDataSource(), new EmailRemoteDataSource()), getContext());
+        viewModel = new EmailsViewModel(EmailDataRepository.provideRepository(), getContext());
+//        viewModel.setRefresh(getArguments().getBoolean(REFRESH));
         binding.setViewModel(viewModel);
         return binding.getRoot();
     }
