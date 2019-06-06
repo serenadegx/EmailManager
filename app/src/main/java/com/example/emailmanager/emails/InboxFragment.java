@@ -10,9 +10,11 @@ import com.example.emailmanager.data.source.EmailDataRepository;
 import com.example.emailmanager.databinding.FragmentInboxBinding;
 import com.example.emailmanager.emails.adapter.EmailListAdapter;
 import com.example.emailmanager.utils.EMDecoration;
+import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.databinding.Observable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -25,6 +27,7 @@ public class InboxFragment extends Fragment {
     public static final int DELETE = 4;
     private FragmentInboxBinding binding;
     private EmailsViewModel viewModel;
+    private Observable.OnPropertyChangedCallback mSnackBarCallback;
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -40,7 +43,8 @@ public class InboxFragment extends Fragment {
         binding.rv.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.rv.addItemDecoration(new EMDecoration(getActivity(), EMDecoration.VERTICAL_LIST, R.drawable.list_divider, 0));
         viewModel = new EmailsViewModel(EmailDataRepository.provideRepository(), getContext());
-//        viewModel.setRefresh(getArguments().getBoolean(REFRESH));
+        viewModel.setRefresh(getArguments().getBoolean(REFRESH));
+        setupSnackBar();
         binding.setViewModel(viewModel);
         return binding.getRoot();
     }
@@ -67,7 +71,6 @@ public class InboxFragment extends Fragment {
         viewModel.loadEmails();
     }
 
-
     private void setupListAdapter() {
         EmailListAdapter listAdapter = new EmailListAdapter(getContext());
         binding.rv.setAdapter(listAdapter);
@@ -91,5 +94,23 @@ public class InboxFragment extends Fragment {
                 break;
         }
         viewModel.loadEmails();
+    }
+
+    private void setupSnackBar() {
+        mSnackBarCallback = new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable observable, int i) {
+                Snackbar.make(getView(), viewModel.getSnackBarText(), Snackbar.LENGTH_SHORT).show();
+            }
+        };
+        viewModel.snackBarText.addOnPropertyChangedCallback(mSnackBarCallback);
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mSnackBarCallback != null) {
+            viewModel.snackBarText.removeOnPropertyChangedCallback(mSnackBarCallback);
+        }
+        super.onDestroy();
     }
 }

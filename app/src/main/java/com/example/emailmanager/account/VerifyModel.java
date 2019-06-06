@@ -16,6 +16,7 @@ import com.example.emailmanager.data.AccountDetailDao;
 import com.example.emailmanager.data.Email;
 import com.example.emailmanager.data.EmailDao;
 
+import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.query.QueryBuilder;
 
 import java.util.Arrays;
@@ -31,42 +32,24 @@ import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Store;
 
+import androidx.annotation.Nullable;
 import androidx.databinding.ObservableField;
 
 public class VerifyModel {
-    private static final int SUCCESS = 1;
-    private static final int ERROR = 2;
     public final ObservableField<String> account = new ObservableField<>();
     public final ObservableField<String> pwd = new ObservableField<>();
+    public final ObservableField<String> snackBarText = new ObservableField<>();
     private final long category;
-    private String host;
-    private Context mContext;
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case SUCCESS:
-                    MainActivity.start2MainActivity(mContext);
-                    ((Activity) mContext).finish();
-                    break;
-                case ERROR:
-                    String hint = (String) msg.obj;
-                    Toast.makeText(mContext, hint, Toast.LENGTH_SHORT).show();
-                    break;
-            }
-        }
-    };
+    private VerityNavigator mNavigator;
 
-    public VerifyModel(String host, Context mContext, long category) {
-        this.host = host;
-        this.mContext = mContext;
+    public VerifyModel(long category) {
         this.category = category;
         initData();
     }
 
-    private void initData() {
-        account.set("guoxinrui@fantaike.ai");
-        pwd.set("1993Gxr");
+    @Nullable
+    public String getSnackBarText() {
+        return snackBarText.get();
     }
 
     public void addAccount(View v) {
@@ -77,9 +60,6 @@ public class VerifyModel {
         if (!(accounts != null && accounts.size() > 0)) {
             if (emails != null && emails.size() == 1) {
                 final Email email = emails.get(0);
-
-
-                Log.i("Mango", "addAccount");
                 new Thread() {
                     @Override
                     public void run() {
@@ -105,19 +85,14 @@ public class VerifyModel {
                             }
                             //储存账号
                             saveAccount();
+                            snackBarText.set("登录成功");
                             SystemClock.sleep(1000);
-                            mHandler.sendEmptyMessage(SUCCESS);
+                            mNavigator.onAccountVerify();
                         } catch (NoSuchProviderException e) {
-                            Message message = Message.obtain();
-                            message.what = ERROR;
-                            message.obj = "验证失败";
-                            mHandler.sendMessage(message);
+                            snackBarText.set("验证失败");
                             e.printStackTrace();
                         } catch (MessagingException e) {
-                            Message message = Message.obtain();
-                            message.what = ERROR;
-                            message.obj = "验证失败";
-                            mHandler.sendMessage(message);
+                            snackBarText.set("验证失败");
                             e.printStackTrace();
                         } finally {
                             try {
@@ -129,13 +104,19 @@ public class VerifyModel {
                     }
                 }.start();
             } else {
-                Message message = Message.obtain();
-                message.what = ERROR;
-                message.obj = "账号重复";
-                mHandler.sendMessage(message);
+                snackBarText.set("账号重复");
             }
         }
 
+    }
+
+    public void onActivityCreated(VerityNavigator navigator) {
+        this.mNavigator = navigator;
+    }
+
+    private void initData() {
+        account.set("guoxinrui@fantaike.ai");
+        pwd.set("1993Gxr");
     }
 
     private void saveAccount() {
@@ -165,6 +146,5 @@ public class VerifyModel {
             EMApplication.setAccount(accountDetail);
         }
     }
-
 
 }
