@@ -18,13 +18,15 @@ import com.example.emailmanager.data.source.remote.EmailRemoteDataSource;
 import com.example.emailmanager.databinding.ActivityMsgSendBinding;
 import com.example.emailmanager.msgsend.adapter.AccessoryListAdapter;
 import com.example.multifile.XRMultiFile;
+import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
+import androidx.databinding.Observable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-public class SendMsgActivity extends AppCompatActivity {
+public class SendMsgActivity extends AppCompatActivity implements SendEmailNavigator {
     public static final int SEND = 1;
     public static final int FORWARD = 2;
     public static final int REPLY = 3;
@@ -33,6 +35,7 @@ public class SendMsgActivity extends AppCompatActivity {
     private SendMsgViewModel viewModel;
     private AccessoryListAdapter listAdapter;
     private ActivityMsgSendBinding binding;
+    private Observable.OnPropertyChangedCallback callback;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,7 +46,19 @@ public class SendMsgActivity extends AppCompatActivity {
         initAdapter();
         viewModel = new SendMsgViewModel(this, EmailDataRepository.provideRepository(),
                 (EmailDetail) getIntent().getSerializableExtra("detail"), binding);
+        viewModel.onActivityCreated(this);
+        setupSnackBar();
         binding.setViewModel(viewModel);
+    }
+
+    private void setupSnackBar() {
+        callback = new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                Snackbar.make(binding.getRoot(), viewModel.getSnackBarText(), Snackbar.LENGTH_SHORT).show();
+            }
+        };
+        viewModel.snackBarText.addOnPropertyChangedCallback(callback);
     }
 
     private void initAdapter() {
@@ -62,6 +77,17 @@ public class SendMsgActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.send, menu);
         return true;
+    }
+
+    @Override
+    public void onSendEmailSuccess() {
+        finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        viewModel.snackBarText.removeOnPropertyChangedCallback(callback);
     }
 
     @Override
@@ -138,5 +164,4 @@ public class SendMsgActivity extends AppCompatActivity {
         context.startActivity(new Intent(context, SendMsgActivity.class)
                 .putExtra("flag", flag));
     }
-
 }

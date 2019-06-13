@@ -1,26 +1,20 @@
 package com.example.emailmanager.account;
 
-import android.app.Activity;
-import android.content.Context;
-import android.os.Handler;
-import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.databinding.ObservableField;
 
 import com.example.emailmanager.EMApplication;
-import com.example.emailmanager.MainActivity;
 import com.example.emailmanager.data.AccountDetail;
 import com.example.emailmanager.data.AccountDetailDao;
 import com.example.emailmanager.data.Email;
 import com.example.emailmanager.data.EmailDao;
 
-import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.query.QueryBuilder;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -31,9 +25,6 @@ import javax.mail.NoSuchProviderException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Store;
-
-import androidx.annotation.Nullable;
-import androidx.databinding.ObservableField;
 
 public class VerifyModel {
     public final ObservableField<String> account = new ObservableField<>();

@@ -61,7 +61,6 @@ public class MainActivity extends AppCompatActivity
         Bundle bundle = new Bundle();
         inboxFragment = new InboxFragment();
         bundle.putInt(InboxFragment.FLAG, InboxFragment.INBOX);
-        bundle.putBoolean(InboxFragment.REFRESH, getIntent().getBooleanExtra("isRefresh", false));
         inboxFragment.setArguments(bundle);
         getSupportFragmentManager().beginTransaction().replace(R.id.fl_contain, inboxFragment).commit();
         initMonitor();

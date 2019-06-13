@@ -1,7 +1,6 @@
 package com.example.emailmanager.emails;
 
 import android.content.Context;
-import android.database.Observable;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -128,7 +127,7 @@ public class EmailsViewModel extends BaseObservable {
         new Thread() {
             @Override
             public void run() {
-                mEmailRepository.loadSentMessage(EMApplication.getAccount(), new EmailDataSource.GetEmailsCallBack() {
+                mEmailRepository.loadSentMessages(EMApplication.getAccount(), new EmailDataSource.GetEmailsCallBack() {
                     @Override
                     public void onEmailsLoaded(List<EmailDetail> emails) {
                         isLoading.set(false);

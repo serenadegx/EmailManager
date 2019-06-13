@@ -14,32 +14,48 @@ import com.example.emailmanager.R;
 import com.example.emailmanager.data.source.EmailDataRepository;
 import com.example.emailmanager.databinding.ActivityEmailDetailBinding;
 import com.example.emailmanager.emaildetail.adapter.AccessoryListAdapter;
+import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.databinding.Observable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-public class EmailDetailActivity extends AppCompatActivity {
+public class EmailDetailActivity extends AppCompatActivity implements EmailDetailNavigator {
     public static final int REQUEST_PERMISSIONS = 1;
 
     private EmailDetailViewModel viewModel;
     private AccessoryListAdapter listAdapter;
+    private ActivityEmailDetailBinding binding;
+    private Observable.OnPropertyChangedCallback callback;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActivityEmailDetailBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_email_detail);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_email_detail);
         initToolbar(binding);
         binding.rvAccessory.setLayoutManager(new LinearLayoutManager(this));
         listAdapter = new AccessoryListAdapter(this);
         binding.rvAccessory.setAdapter(listAdapter);
-        viewModel = new EmailDetailViewModel(this, EmailDataRepository.provideRepository(), getIntent().getLongExtra("msgnum", 0));
+        viewModel = new EmailDetailViewModel(this, EmailDataRepository.provideRepository(),
+                getIntent().getLongExtra("msgnum", 0));
+        viewModel.onActivityCreated(this);
         binding.setViewModel(viewModel);
-        viewModel.setWebView(binding.webView);
-        viewModel.loadDataById();
+        setupSnackBar();
+        viewModel.loadDataById(getIntent().getIntExtra("type", 0));
+    }
+
+    private void setupSnackBar() {
+        callback = new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                Snackbar.make(binding.getRoot(), viewModel.getSnackBarText(), Snackbar.LENGTH_SHORT).show();
+            }
+        };
+        viewModel.snackBarText.addOnPropertyChangedCallback(callback);
     }
 
     @Override
@@ -63,6 +79,17 @@ public class EmailDetailActivity extends AppCompatActivity {
                         }
                     }).show();
         }
+    }
+
+    @Override
+    public void onDeleteSuccess() {
+        finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        viewModel.snackBarText.removeOnPropertyChangedCallback(callback);
     }
 
     private void initToolbar(ActivityEmailDetailBinding binding) {
@@ -97,5 +124,11 @@ public class EmailDetailActivity extends AppCompatActivity {
 
     public static void start2EmailDetailActivity(Context context, Long msgNum) {
         context.startActivity(new Intent(context, EmailDetailActivity.class).putExtra("msgnum", msgNum));
+    }
+
+    public static void start2EmailDetailActivity(Context context, Long msgNum, int type) {
+        context.startActivity(new Intent(context, EmailDetailActivity.class)
+                .putExtra("msgnum", msgNum)
+                .putExtra("type", type));
     }
 }

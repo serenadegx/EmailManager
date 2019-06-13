@@ -126,8 +126,12 @@ public class EmailDataRepository implements EmailDataSource {
 
     }
 
-    public void loadSentMessage(AccountDetail account, GetEmailsCallBack callBack) {
-        ((EmailRemoteDataSource) mEmailRemoteDataSource).loadSentMessage(account, callBack);
+    public void loadSentMessages(AccountDetail account, GetEmailsCallBack callBack) {
+        ((EmailRemoteDataSource) mEmailRemoteDataSource).loadSentMessages(account, callBack);
+    }
+
+    public void loadSentMessage(AccountDetail detail, long id, final GetEmailCallBack callBack) {
+        ((EmailRemoteDataSource) mEmailRemoteDataSource).loadSentMessage(detail, id, callBack);
     }
 
     public void loadDrafts(AccountDetail account, GetEmailsCallBack callBack) {

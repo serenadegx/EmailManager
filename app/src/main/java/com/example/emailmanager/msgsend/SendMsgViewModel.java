@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -35,6 +36,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.Nullable;
 import androidx.databinding.ObservableArrayList;
 import androidx.databinding.ObservableField;
 import androidx.databinding.ObservableList;
@@ -42,11 +44,6 @@ import androidx.databinding.ObservableList;
 import static android.app.Activity.RESULT_OK;
 
 public class SendMsgViewModel {
-    private static final int SUCCESS = 1;
-    private static final int ERROR = 2;
-    private static final int SAVE_SUCCESS = 3;
-    private static final int FORWARD_SUCCESS = 4;
-    private static final int REPLY_SUCCESS = 5;
     public final ObservableList<AccessoryDetail> mItems = new ObservableArrayList<>();
     public final ObservableField<String> receiver = new ObservableField<>();
     public final ObservableField<String> copy = new ObservableField<>();
@@ -54,6 +51,7 @@ public class SendMsgViewModel {
     public final ObservableField<String> send = new ObservableField<>();
     public final ObservableField<String> subject = new ObservableField<>();
     public final ObservableField<String> content = new ObservableField<>();
+    public final ObservableField<String> snackBarText = new ObservableField<>();
     private final Context mContext;
     private final EmailDataRepository mEmailRepository;
     private final EmailDetail mDetail;
@@ -61,39 +59,40 @@ public class SendMsgViewModel {
     private List<AccessoryDetail> mAccessory;
     private AccessoryListAdapter mAdapter;
     private ProgressDialog dialog;
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            String hint;
-            if (msg.what == SUCCESS) {
-                if (dialog != null) {
-                    dialog.cancel();
-                }
-                hint = "发送成功";
-                ((Activity) mContext).finish();
-            } else if (msg.what == SAVE_SUCCESS) {
-                hint = "保存成功";
-                ((Activity) mContext).finish();
-            } else if (msg.what == REPLY_SUCCESS) {
-                if (dialog != null) {
-                    dialog.cancel();
-                }
-                hint = "回复成功";
-                ((Activity) mContext).finish();
-            } else if (msg.what == FORWARD_SUCCESS) {
-                if (dialog != null) {
-                    dialog.cancel();
-                }
-                hint = "转发成功";
-                ((Activity) mContext).finish();
-            } else if (msg.what == ERROR) {
-                hint = (String) msg.obj;
-            } else {
-                hint = "";
-            }
-            Toast.makeText(mContext, hint, Toast.LENGTH_SHORT).show();
-        }
-    };
+    private SendEmailNavigator mNavigator;
+//    private Handler mHandler = new Handler() {
+//        @Override
+//        public void handleMessage(Message msg) {
+//            String hint;
+//            if (msg.what == SUCCESS) {
+//                if (dialog != null) {
+//                    dialog.cancel();
+//                }
+//                hint = "发送成功";
+//                ((Activity) mContext).finish();
+//            } else if (msg.what == SAVE_SUCCESS) {
+//                hint = "保存成功";
+//                ((Activity) mContext).finish();
+//            } else if (msg.what == REPLY_SUCCESS) {
+//                if (dialog != null) {
+//                    dialog.cancel();
+//                }
+//                hint = "回复成功";
+//                ((Activity) mContext).finish();
+//            } else if (msg.what == FORWARD_SUCCESS) {
+//                if (dialog != null) {
+//                    dialog.cancel();
+//                }
+//                hint = "转发成功";
+//                ((Activity) mContext).finish();
+//            } else if (msg.what == ERROR) {
+//                hint = (String) msg.obj;
+//            } else {
+//                hint = "";
+//            }
+//            Toast.makeText(mContext, hint, Toast.LENGTH_SHORT).show();
+//        }
+//    };
     private ListPopupWindow popupWindow;
     private ArrayAdapter<Contacts> adapter;
 
@@ -119,6 +118,15 @@ public class SendMsgViewModel {
 
     }
 
+    public void onActivityCreated(SendEmailNavigator navigator) {
+        mNavigator = navigator;
+    }
+
+    @Nullable
+    public String getSnackBarText() {
+        return snackBarText.get();
+    }
+
 
     public void sendMsg() {
         dialog = ProgressDialog.show(mContext, "", "正在发送...", false, false);
@@ -129,22 +137,23 @@ public class SendMsgViewModel {
         data.setBcc(TextUtils.isEmpty(secret.get()) ? null : secret.get());
         data.setSubject(subject.get());
         data.setContent(content.get());
-        data.setAccessoryList(mAdapter.mData);
+        data.setAccessoryList(mItems);
         new Thread() {
             @Override
             public void run() {
                 mEmailRepository.sendEmail(EMApplication.getAccount(), data, new EmailDataSource.GetResultCallBack() {
                     @Override
                     public void onSuccess() {
-                        mHandler.sendEmptyMessage(SUCCESS);
+                        dialog.cancel();
+                        snackBarText.set("发送成功");
+                        SystemClock.sleep(500);
+                        mNavigator.onSendEmailSuccess();
                     }
 
                     @Override
                     public void onError(String ex) {
-                        Message message = Message.obtain();
-                        message.what = ERROR;
-                        message.obj = ex;
-                        mHandler.sendMessage(message);
+                        dialog.cancel();
+                        snackBarText.set("发送失败");
                     }
                 });
             }
@@ -160,22 +169,21 @@ public class SendMsgViewModel {
         data.setBcc(TextUtils.isEmpty(secret.get()) ? null : secret.get());
         data.setSubject(subject.get());
         data.setContent(content.get());
-        data.setAccessoryList(mAccessory);
+        data.setAccessoryList(mItems);
         new Thread() {
             @Override
             public void run() {
                 mEmailRepository.save2Drafts(EMApplication.getAccount(), data, new EmailDataSource.GetResultCallBack() {
                     @Override
                     public void onSuccess() {
-                        mHandler.sendEmptyMessage(SAVE_SUCCESS);
+                        snackBarText.set("保存成功");
+                        SystemClock.sleep(500);
+                        mNavigator.onSendEmailSuccess();
                     }
 
                     @Override
                     public void onError(String ex) {
-                        Message message = Message.obtain();
-                        message.what = ERROR;
-                        message.obj = ex;
-                        mHandler.sendMessage(message);
+                        snackBarText.set("保存失败");
                     }
                 });
             }
@@ -192,22 +200,23 @@ public class SendMsgViewModel {
         data.setSubject(subject.get());
         data.setContent(content.get());
         data.setId(mDetail.getId());
-        data.setAccessoryList(mAccessory);
+        data.setAccessoryList(mItems);
         new Thread() {
             @Override
             public void run() {
                 mEmailRepository.forward(EMApplication.getAccount(), data, new EmailDataSource.GetResultCallBack() {
                     @Override
                     public void onSuccess() {
-                        mHandler.sendEmptyMessage(FORWARD_SUCCESS);
+                        dialog.cancel();
+                        snackBarText.set("转发成功");
+                        SystemClock.sleep(500);
+                        mNavigator.onSendEmailSuccess();
                     }
 
                     @Override
                     public void onError(String ex) {
-                        Message message = Message.obtain();
-                        message.what = ERROR;
-                        message.obj = ex;
-                        mHandler.sendMessage(message);
+                        dialog.cancel();
+                        snackBarText.set("转发失败");
                     }
                 });
             }
@@ -224,22 +233,23 @@ public class SendMsgViewModel {
         data.setSubject(subject.get());
         data.setContent(content.get());
         data.setId(mDetail.getId());
-        data.setAccessoryList(mAccessory);
+        data.setAccessoryList(mItems);
         new Thread() {
             @Override
             public void run() {
                 mEmailRepository.reply(EMApplication.getAccount(), data, new EmailDataSource.GetResultCallBack() {
                     @Override
                     public void onSuccess() {
-                        mHandler.sendEmptyMessage(REPLY_SUCCESS);
+                        dialog.cancel();
+                        snackBarText.set("回复成功");
+                        SystemClock.sleep(500);
+                        mNavigator.onSendEmailSuccess();
                     }
 
                     @Override
                     public void onError(String ex) {
-                        Message message = Message.obtain();
-                        message.what = ERROR;
-                        message.obj = ex;
-                        mHandler.sendMessage(message);
+                        dialog.cancel();
+                        snackBarText.set("回复失败");
                     }
                 });
             }
@@ -334,7 +344,7 @@ public class SendMsgViewModel {
     };
 
     public void delete(AccessoryDetail item, int position) {
-        Log.i("mango","delete");
+        Log.i("mango", "delete");
         mItems.remove(position);
     }
 

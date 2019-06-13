@@ -24,6 +24,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             app:navigationIcon="@mipmap/back"
+            app:title="@{viewModel.title}"
             app:titleTextColor="@android:color/white" />
 
         <ScrollView
@@ -162,11 +163,11 @@
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv_accessory"
-                        android:items="@{viewModel.mItems}"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="6dp"
                         android:layout_marginRight="6dp"
+                        android:items="@{viewModel.mItems}"
                         tools:listitem="@layout/item_accessory" />
                 </LinearLayout>
 
@@ -176,6 +177,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="6dp"
                     android:layout_marginRight="6dp"
+                    android:html="@{viewModel.html}"
                     android:scrollbars="none" />
             </LinearLayout>
 

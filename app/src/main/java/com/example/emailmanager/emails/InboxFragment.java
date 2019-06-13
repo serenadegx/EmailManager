@@ -28,6 +28,8 @@ public class InboxFragment extends Fragment {
     private FragmentInboxBinding binding;
     private EmailsViewModel viewModel;
     private Observable.OnPropertyChangedCallback mSnackBarCallback;
+    private int type = 1;
+    private EmailListAdapter listAdapter;
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -43,7 +45,6 @@ public class InboxFragment extends Fragment {
         binding.rv.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.rv.addItemDecoration(new EMDecoration(getActivity(), EMDecoration.VERTICAL_LIST, R.drawable.list_divider, 0));
         viewModel = new EmailsViewModel(EmailDataRepository.provideRepository(), getContext());
-        viewModel.setRefresh(getArguments().getBoolean(REFRESH));
         setupSnackBar();
         binding.setViewModel(viewModel);
         return binding.getRoot();
@@ -72,11 +73,12 @@ public class InboxFragment extends Fragment {
     }
 
     private void setupListAdapter() {
-        EmailListAdapter listAdapter = new EmailListAdapter(getContext());
+        listAdapter = new EmailListAdapter(getContext());
         binding.rv.setAdapter(listAdapter);
     }
 
     public void setLoadType(int type) {
+        listAdapter.setType(type);
         switch (type) {
             case INBOX:
                 viewModel.setLoadType(INBOX);
