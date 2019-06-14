@@ -45,7 +45,7 @@ public class SendMsgActivity extends AppCompatActivity implements SendEmailNavig
         binding.rvAccessory.setLayoutManager(new LinearLayoutManager(this));
         initAdapter();
         viewModel = new SendMsgViewModel(this, EmailDataRepository.provideRepository(),
-                (EmailDetail) getIntent().getSerializableExtra("detail"), binding);
+                (EmailDetail) getIntent().getParcelableExtra("detail"), binding);
         viewModel.onActivityCreated(this);
         setupSnackBar();
         binding.setViewModel(viewModel);

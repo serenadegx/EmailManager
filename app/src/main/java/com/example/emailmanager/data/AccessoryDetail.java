@@ -1,6 +1,9 @@
 package com.example.emailmanager.data;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Transient;
@@ -14,7 +17,7 @@ import androidx.databinding.Bindable;
 import org.greenrobot.greendao.annotation.Generated;
 
 @Entity
-public class AccessoryDetail extends BaseObservable {
+public class AccessoryDetail extends BaseObservable implements Parcelable {
     @Id(autoincrement = true)
     private Long id;
     private String fileName;
@@ -72,6 +75,36 @@ public class AccessoryDetail extends BaseObservable {
     public AccessoryDetail() {
     }
 
+
+    protected AccessoryDetail(Parcel in) {
+        if (in.readByte() == 0) {
+            id = null;
+        } else {
+            id = in.readLong();
+        }
+        fileName = in.readString();
+        path = in.readString();
+        size = in.readString();
+        total = in.readLong();
+        isDownload = in.readByte() != 0;
+        if (in.readByte() == 0) {
+            emailId = null;
+        } else {
+            emailId = in.readLong();
+        }
+    }
+
+    public static final Creator<AccessoryDetail> CREATOR = new Creator<AccessoryDetail>() {
+        @Override
+        public AccessoryDetail createFromParcel(Parcel in) {
+            return new AccessoryDetail(in);
+        }
+
+        @Override
+        public AccessoryDetail[] newArray(int size) {
+            return new AccessoryDetail[size];
+        }
+    };
 
     public long getTotal() {
         return total;
@@ -152,5 +185,31 @@ public class AccessoryDetail extends BaseObservable {
 
     public void setIsDownload(boolean isDownload) {
         this.isDownload = isDownload;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        if (id == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(id);
+        }
+        dest.writeString(fileName);
+        dest.writeString(path);
+        dest.writeString(size);
+        dest.writeLong(total);
+        dest.writeByte((byte) (isDownload ? 1 : 0));
+        if (emailId == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(emailId);
+        }
     }
 }

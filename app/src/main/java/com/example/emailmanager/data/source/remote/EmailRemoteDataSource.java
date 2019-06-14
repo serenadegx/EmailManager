@@ -513,17 +513,202 @@ public class EmailRemoteDataSource implements EmailDataSource {
 
     }
 
+    public void loadSentMessages(final AccountDetail detail, GetEmailsCallBack callBack) {
+        List<EmailDetail> data = new ArrayList<>();
+        Properties props = System.getProperties();
+        props.put(detail.getEmail().getReceiveHostKey(), detail.getEmail().getReceiveHostValue());
+        props.put(detail.getEmail().getReceivePortKey(), detail.getEmail().getReceivePortValue());
+        props.put(detail.getEmail().getReceiveEncryptKey(), detail.getEmail().getReceiveEncryptValue());
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(
+                        detail.getAccount(), detail.getPwd());
+            }
+        });
+//        session.setDebug(true);
+        Store store = null;
+        Folder inbox = null;
+        try {
+            store = session.getStore(detail.getEmail().getReceiveProtocol());
+            store.connect();
+            inbox = store.getFolder("Sent Messages");
+            inbox.open(Folder.READ_ONLY);
+            Message[] messages = inbox.getMessages();
+            for (Message message : messages) {
+                InternetAddress address = (InternetAddress) message.getFrom()[0];
+                InternetAddress to = (InternetAddress) message.getRecipients(Message.RecipientType.TO)[0];
+                StringBuilder sb = new StringBuilder();
+                for (Address toAddress : message.getRecipients(Message.RecipientType.TO)) {
+                    sb.append(((InternetAddress) toAddress).getPersonal() + ",");
+                }
+                sb.replace(sb.length() - 1, sb.length(), "");
+                EmailDetail emailDetail = new EmailDetail((long) message.getMessageNumber(), message.getSubject(),
+                        dateFormat(message.getReceivedDate()), sb.toString());
+                //发件箱默认已读
+                emailDetail.setRead(true);
+                data.add(emailDetail);
+            }
+            Collections.reverse(data);
+            callBack.onEmailsLoaded(data);
+        } catch (NoSuchProviderException e) {
+            callBack.onDataNotAvailable();
+            e.printStackTrace();
+        } catch (MessagingException e) {
+            callBack.onDataNotAvailable();
+            e.printStackTrace();
+        } finally {
+            try {
+                if (inbox != null)
+                    inbox.close();
+                if (store != null)
+                    store.close();
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void loadSentMessage(final AccountDetail detail, long msgNum, GetEmailCallBack callBack){
+        Log.i("Mango","----->loadSentMessage");
+        EmailDetail data = null;
+        Properties props = System.getProperties();
+        props.put(detail.getEmail().getReceiveHostKey(), detail.getEmail().getReceiveHostValue());
+        props.put(detail.getEmail().getReceivePortKey(), detail.getEmail().getReceivePortValue());
+        props.put(detail.getEmail().getReceiveEncryptKey(), detail.getEmail().getReceiveEncryptValue());
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(
+                        detail.getAccount(), detail.getPwd());
+            }
+        });
+//        session.setDebug(true);
+        Store store = null;
+        Folder inbox = null;
+        try {
+            store = session.getStore(detail.getEmail().getReceiveProtocol());
+            store.connect();
+            inbox = store.getFolder("Sent Messages");
+            inbox.open(Folder.READ_ONLY);
+            Message message = inbox.getMessage((int) msgNum);
+            data = new EmailDetail();
+            data.setId((long) message.getMessageNumber());
+            Address[] recipients = message.getRecipients(Message.RecipientType.TO);
+            if (recipients != null) {
+                StringBuffer sb = new StringBuffer();
+                for (Address recipient : recipients) {
+                    sb.append(((InternetAddress) recipient).getAddress() + ";");
+                }
+                data.setTo(sb.toString());
+            }
+            Address[] ccs = message.getRecipients(Message.RecipientType.CC);
+            if (ccs != null) {
+                StringBuffer sbCc = new StringBuffer();
+                for (Address recipient : ccs) {
+                    sbCc.append(((InternetAddress) recipient).getAddress() + ";");
+                }
+                data.setCc(sbCc.toString());
+            }
+            Address[] bccs = message.getRecipients(Message.RecipientType.BCC);
+            if (bccs != null) {
+                StringBuffer sbBcc = new StringBuffer();
+                for (Address recipient : bccs) {
+                    sbBcc.append(((InternetAddress) recipient).getAddress() + ";");
+                }
+                data.setBcc(sbBcc.toString());
+            }
+            InternetAddress address = (InternetAddress) message.getFrom()[0];
+            data.setFrom(address.getAddress());
+            data.setPersonal(address.getPersonal());
+            data.setSubject(message.getSubject());
+            data.setDate(dateFormat(message.getReceivedDate()));
+            data.setAccessoryList(new ArrayList<AccessoryDetail>());
+            dumpPartReal(message, data);
+            callBack.onEmailLoaded(data);
+        } catch (NoSuchProviderException e) {
+            e.printStackTrace();
+            callBack.onDataNotAvailable();
+        } catch (Exception e) {
+            e.printStackTrace();
+            callBack.onDataNotAvailable();
+        } finally {
+//            try {
+//                if (inbox != null)
+//                    inbox.close();
+//                if (store != null)
+//                    store.close();
+//            } catch (MessagingException e) {
+//                e.printStackTrace();
+//            }
+        }
+    }
+
+    public void loadDrafts(final AccountDetail detail, GetEmailsCallBack callBack) {
+        List<EmailDetail> data = new ArrayList<>();
+        Properties props = System.getProperties();
+        props.put(detail.getEmail().getReceiveHostKey(), detail.getEmail().getReceiveHostValue());
+        props.put(detail.getEmail().getReceivePortKey(), detail.getEmail().getReceivePortValue());
+        props.put(detail.getEmail().getReceiveEncryptKey(), detail.getEmail().getReceiveEncryptValue());
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(
+                        detail.getAccount(), detail.getPwd());
+            }
+        });
+//        session.setDebug(true);
+        Store store = null;
+        Folder inbox = null;
+        try {
+            store = session.getStore(detail.getEmail().getReceiveProtocol());
+            store.connect();
+            inbox = store.getFolder("Drafts");
+            inbox.open(Folder.READ_ONLY);
+            Message[] messages = inbox.getMessages();
+            for (Message message : messages) {
+                InternetAddress address = (InternetAddress) message.getFrom()[0];
+                InternetAddress to = (InternetAddress) message.getRecipients(Message.RecipientType.TO)[0];
+                StringBuilder sb = new StringBuilder();
+                for (Address toAddress : message.getRecipients(Message.RecipientType.TO)) {
+                    sb.append(((InternetAddress) toAddress).getAddress() + ",");
+                }
+                sb.replace(sb.length() - 1, sb.length(), "");
+                EmailDetail emailDetail = new EmailDetail((long) message.getMessageNumber(), message.getSubject(),
+                        dateFormat(message.getReceivedDate()), sb.toString());
+                emailDetail.setAccessoryList(new ArrayList<AccessoryDetail>());
+                emailDetail.setRead(true);
+                dumpPartReal(message, emailDetail);
+                data.add(emailDetail);
+            }
+            Collections.reverse(data);
+            callBack.onEmailsLoaded(data);
+        } catch (NoSuchProviderException e) {
+            callBack.onDataNotAvailable();
+            e.printStackTrace();
+        } catch (MessagingException e) {
+            callBack.onDataNotAvailable();
+            e.printStackTrace();
+        } finally {
+            try {
+                inbox.close();
+                store.close();
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public static void dumpPart(Part p, EmailDetail data) {
         try {
             if (p.isMimeType("text/plain")) {
-//                System.out.println((String) p.getContent());
+                data.setContent((String) p.getContent());
             } else if (p.isMimeType("multipart/*")) {
                 if (p.isMimeType("multipart/report")) {
-                    //                MimeMessage cmsg = new MimeMessage((MimeMessage) p);
-                    //                int count = cmsg.getCount();
-                    //                for (int i = 0; i < count; i++)
-                    //                    dumpPart(mp.getBodyPart(i), data);
-                    return;
+                    Multipart mp = (Multipart) p.getContent();
+                    int count = mp.getCount();
+                    for (int i = 0; i < count; i++)
+                        dumpPartReal(mp.getBodyPart(i), data);
                 } else {
                     Multipart mp = (Multipart) p.getContent();
                     int count = mp.getCount();
@@ -658,191 +843,5 @@ public class EmailRemoteDataSource implements EmailDataSource {
         sb.append(data.getContent());
         return new DataHandler(
                 new ByteArrayDataSource(sb.toString(), "text/html"));
-    }
-
-    public void loadSentMessages(final AccountDetail detail, GetEmailsCallBack callBack) {
-        List<EmailDetail> data = new ArrayList<>();
-        Properties props = System.getProperties();
-        props.put(detail.getEmail().getReceiveHostKey(), detail.getEmail().getReceiveHostValue());
-        props.put(detail.getEmail().getReceivePortKey(), detail.getEmail().getReceivePortValue());
-        props.put(detail.getEmail().getReceiveEncryptKey(), detail.getEmail().getReceiveEncryptValue());
-        Session session = Session.getInstance(props, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(
-                        detail.getAccount(), detail.getPwd());
-            }
-        });
-//        session.setDebug(true);
-        Store store = null;
-        Folder inbox = null;
-        try {
-            store = session.getStore(detail.getEmail().getReceiveProtocol());
-            store.connect();
-            inbox = store.getFolder("Sent Messages");
-            inbox.open(Folder.READ_ONLY);
-            Message[] messages = inbox.getMessages();
-            for (Message message : messages) {
-                InternetAddress address = (InternetAddress) message.getFrom()[0];
-                InternetAddress to = (InternetAddress) message.getRecipients(Message.RecipientType.TO)[0];
-                StringBuilder sb = new StringBuilder();
-                for (Address toAddress : message.getRecipients(Message.RecipientType.TO)) {
-                    sb.append(((InternetAddress) toAddress).getPersonal() + ",");
-                }
-                sb.replace(sb.length() - 1, sb.length(), "");
-                EmailDetail emailDetail = new EmailDetail((long) message.getMessageNumber(), message.getSubject(),
-                        dateFormat(message.getReceivedDate()), sb.toString());
-                //发件箱默认已读
-                emailDetail.setRead(true);
-                data.add(emailDetail);
-            }
-            Collections.reverse(data);
-            callBack.onEmailsLoaded(data);
-        } catch (NoSuchProviderException e) {
-            callBack.onDataNotAvailable();
-            e.printStackTrace();
-        } catch (MessagingException e) {
-            callBack.onDataNotAvailable();
-            e.printStackTrace();
-        } finally {
-            try {
-                if (inbox != null)
-                    inbox.close();
-                if (store != null)
-                    store.close();
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void loadSentMessage(final AccountDetail detail, long msgNum, GetEmailCallBack callBack){
-        Log.i("Mango","----->loadSentMessage");
-        EmailDetail data = null;
-        Properties props = System.getProperties();
-        props.put(detail.getEmail().getReceiveHostKey(), detail.getEmail().getReceiveHostValue());
-        props.put(detail.getEmail().getReceivePortKey(), detail.getEmail().getReceivePortValue());
-        props.put(detail.getEmail().getReceiveEncryptKey(), detail.getEmail().getReceiveEncryptValue());
-        Session session = Session.getInstance(props, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(
-                        detail.getAccount(), detail.getPwd());
-            }
-        });
-//        session.setDebug(true);
-        Store store = null;
-        Folder inbox = null;
-        try {
-            store = session.getStore(detail.getEmail().getReceiveProtocol());
-            store.connect();
-            inbox = store.getFolder("Sent Messages");
-            inbox.open(Folder.READ_ONLY);
-            Message message = inbox.getMessage((int) msgNum);
-            data = new EmailDetail();
-            data.setId((long) message.getMessageNumber());
-            Address[] recipients = message.getRecipients(Message.RecipientType.TO);
-            if (recipients != null) {
-                StringBuffer sb = new StringBuffer();
-                for (Address recipient : recipients) {
-                    sb.append(((InternetAddress) recipient).getAddress() + ";");
-                }
-                data.setTo(sb.toString());
-            }
-            Address[] ccs = message.getRecipients(Message.RecipientType.CC);
-            if (ccs != null) {
-                StringBuffer sbCc = new StringBuffer();
-                for (Address recipient : ccs) {
-                    sbCc.append(((InternetAddress) recipient).getAddress() + ";");
-                }
-                data.setCc(sbCc.toString());
-            }
-            Address[] bccs = message.getRecipients(Message.RecipientType.BCC);
-            if (bccs != null) {
-                StringBuffer sbBcc = new StringBuffer();
-                for (Address recipient : bccs) {
-                    sbBcc.append(((InternetAddress) recipient).getAddress() + ";");
-                }
-                data.setBcc(sbBcc.toString());
-            }
-            InternetAddress address = (InternetAddress) message.getFrom()[0];
-            data.setFrom(address.getAddress());
-            data.setPersonal(address.getPersonal());
-            data.setSubject(message.getSubject());
-            data.setDate(dateFormat(message.getReceivedDate()));
-            data.setAccessoryList(new ArrayList<AccessoryDetail>());
-            dumpPartReal(message, data);
-            callBack.onEmailLoaded(data);
-        } catch (NoSuchProviderException e) {
-            e.printStackTrace();
-            callBack.onDataNotAvailable();
-        } catch (Exception e) {
-            e.printStackTrace();
-            callBack.onDataNotAvailable();
-        } finally {
-//            try {
-//                if (inbox != null)
-//                    inbox.close();
-//                if (store != null)
-//                    store.close();
-//            } catch (MessagingException e) {
-//                e.printStackTrace();
-//            }
-        }
-    }
-
-
-    public void loadDrafts(final AccountDetail detail, GetEmailsCallBack callBack) {
-        List<EmailDetail> data = new ArrayList<>();
-        Properties props = System.getProperties();
-        props.put(detail.getEmail().getReceiveHostKey(), detail.getEmail().getReceiveHostValue());
-        props.put(detail.getEmail().getReceivePortKey(), detail.getEmail().getReceivePortValue());
-        props.put(detail.getEmail().getReceiveEncryptKey(), detail.getEmail().getReceiveEncryptValue());
-        Session session = Session.getInstance(props, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(
-                        detail.getAccount(), detail.getPwd());
-            }
-        });
-//        session.setDebug(true);
-        Store store = null;
-        Folder inbox = null;
-        try {
-            store = session.getStore(detail.getEmail().getReceiveProtocol());
-            store.connect();
-            inbox = store.getFolder("Drafts");
-            inbox.open(Folder.READ_ONLY);
-            Message[] messages = inbox.getMessages();
-            for (Message message : messages) {
-                InternetAddress address = (InternetAddress) message.getFrom()[0];
-                InternetAddress to = (InternetAddress) message.getRecipients(Message.RecipientType.TO)[0];
-                StringBuilder sb = new StringBuilder();
-                for (Address toAddress : message.getRecipients(Message.RecipientType.TO)) {
-                    sb.append(((InternetAddress) toAddress).getPersonal() + ",");
-                }
-                sb.replace(sb.length() - 1, sb.length(), "");
-                EmailDetail emailDetail = new EmailDetail((long) message.getMessageNumber(), message.getSubject(),
-                        dateFormat(message.getReceivedDate()), sb.toString());
-                //发件箱默认已读
-                emailDetail.setRead(true);
-                data.add(emailDetail);
-            }
-            Collections.reverse(data);
-            callBack.onEmailsLoaded(data);
-        } catch (NoSuchProviderException e) {
-            callBack.onDataNotAvailable();
-            e.printStackTrace();
-        } catch (MessagingException e) {
-            callBack.onDataNotAvailable();
-            e.printStackTrace();
-        } finally {
-            try {
-                inbox.close();
-                store.close();
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            }
-        }
     }
 }

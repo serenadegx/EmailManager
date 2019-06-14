@@ -44,7 +44,7 @@ import androidx.databinding.ObservableList;
 import static android.app.Activity.RESULT_OK;
 
 public class SendMsgViewModel {
-    public final ObservableList<AccessoryDetail> mItems = new ObservableArrayList<>();
+    public final ObservableArrayList<AccessoryDetail> mItems = new ObservableArrayList<>();
     public final ObservableField<String> receiver = new ObservableField<>();
     public final ObservableField<String> copy = new ObservableField<>();
     public final ObservableField<String> secret = new ObservableField<>();
@@ -60,7 +60,7 @@ public class SendMsgViewModel {
     private AccessoryListAdapter mAdapter;
     private ProgressDialog dialog;
     private SendEmailNavigator mNavigator;
-//    private Handler mHandler = new Handler() {
+    //    private Handler mHandler = new Handler() {
 //        @Override
 //        public void handleMessage(Message msg) {
 //            String hint;
@@ -103,19 +103,28 @@ public class SendMsgViewModel {
         this.mDetail = detail;
         mAccessory = new ArrayList<>();
         send.set(EMApplication.getAccount().getAccount());
-        int flag = ((Activity) mContext).getIntent().getIntExtra("flag", -1);
-        if (flag == SendMsgActivity.SEND) {
-            subject.set("");
-        } else if (flag == SendMsgActivity.FORWARD) {
-            subject.set("转发:" + detail.getSubject());
-        } else if (flag == SendMsgActivity.REPLY) {
-            receiver.set(detail.getFrom());
-            subject.set("回复:" + detail.getSubject());
-        } else if (flag == SendMsgActivity.REPLY_ALL) {
-            receiver.set(detail.getFrom());
-            subject.set("回复:" + detail.getSubject());
-        }
+        bindData();
 
+
+    }
+
+    private void bindData() {
+        int flag = ((Activity) mContext).getIntent().getIntExtra("flag", -1);
+        if (flag == SendMsgActivity.FORWARD) {
+            subject.set("转发:" + mDetail.getSubject());
+        } else if (flag == SendMsgActivity.REPLY) {
+            receiver.set(mDetail.getFrom());
+            subject.set("回复:" + mDetail.getSubject());
+        } else if (flag == SendMsgActivity.REPLY_ALL) {
+            receiver.set(mDetail.getFrom());
+            subject.set("回复:" + mDetail.getSubject());
+        }
+        receiver.set(TextUtils.isEmpty(mDetail.getFrom()) ? "" : mDetail.getFrom());
+        subject.set(TextUtils.isEmpty(mDetail.getSubject()) ? "" : mDetail.getSubject());
+        content.set(TextUtils.isEmpty(mDetail.getContent()) ? "" : mDetail.getContent());
+        if (mDetail.accessoryList != null && mDetail.accessoryList.size() > 0) {
+            mItems.addAll(mDetail.getAccessoryList());
+        }
     }
 
     public void onActivityCreated(SendEmailNavigator navigator) {

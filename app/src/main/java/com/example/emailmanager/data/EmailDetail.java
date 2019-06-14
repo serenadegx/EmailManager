@@ -1,6 +1,9 @@
 package com.example.emailmanager.data;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.ToMany;
@@ -18,8 +21,7 @@ import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.DaoException;
 
 @Entity
-public class EmailDetail extends BaseObservable implements Serializable {
-    private static final long serialVersionUID = 6201378234876550715L;
+public class EmailDetail extends BaseObservable implements Parcelable{
     @Id
     private Long id;
     private boolean isRead;
@@ -32,13 +34,7 @@ public class EmailDetail extends BaseObservable implements Serializable {
     private String bcc;
     private String content;
     @ToMany(referencedJoinProperty = "emailId")
-    private List<AccessoryDetail> accessoryList;
-    /** Used to resolve relations */
-    @Generated(hash = 2040040024)
-    private transient DaoSession daoSession;
-    /** Used for active entity operations. */
-    @Generated(hash = 174579630)
-    private transient EmailDetailDao myDao;
+    public List<AccessoryDetail> accessoryList = new ArrayList<>();
 
     public EmailDetail() {
     }
@@ -48,6 +44,25 @@ public class EmailDetail extends BaseObservable implements Serializable {
         this.subject = subject;
         this.date = date;
         this.from = from;
+    }
+
+
+    protected EmailDetail(Parcel in) {
+        if (in.readByte() == 0) {
+            id = null;
+        } else {
+            id = in.readLong();
+        }
+        isRead = in.readByte() != 0;
+        subject = in.readString();
+        date = in.readString();
+        from = in.readString();
+        personal = in.readString();
+        to = in.readString();
+        cc = in.readString();
+        bcc = in.readString();
+        content = in.readString();
+        accessoryList = in.createTypedArrayList(AccessoryDetail.CREATOR);
     }
 
     @Generated(hash = 2132571833)
@@ -64,6 +79,24 @@ public class EmailDetail extends BaseObservable implements Serializable {
         this.bcc = bcc;
         this.content = content;
     }
+
+    public static final Creator<EmailDetail> CREATOR = new Creator<EmailDetail>() {
+        @Override
+        public EmailDetail createFromParcel(Parcel in) {
+            return new EmailDetail(in);
+        }
+
+        @Override
+        public EmailDetail[] newArray(int size) {
+            return new EmailDetail[size];
+        }
+    };
+    /** Used to resolve relations */
+    @Generated(hash = 2040040024)
+    private transient DaoSession daoSession;
+    /** Used for active entity operations. */
+    @Generated(hash = 174579630)
+    private transient EmailDetailDao myDao;
 
     public void setPersonal(String personal) {
         this.personal = personal;
@@ -160,13 +193,38 @@ public class EmailDetail extends BaseObservable implements Serializable {
     }
 
     public void setAccessoryList(List<AccessoryDetail> accessoryList) {
-        this.accessoryList = accessoryList;
+        this.accessoryList =  accessoryList;
     }
     
 
     @Override
     public boolean equals(@Nullable Object obj) {
         return (obj instanceof EmailDetail && this.getId() == ((EmailDetail) obj).getId());
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        if (id == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(id);
+        }
+        dest.writeByte((byte) (isRead ? 1 : 0));
+        dest.writeString(subject);
+        dest.writeString(date);
+        dest.writeString(from);
+        dest.writeString(personal);
+        dest.writeString(to);
+        dest.writeString(cc);
+        dest.writeString(bcc);
+        dest.writeString(content);
+        dest.writeTypedList(accessoryList);
     }
 
     /**
@@ -240,5 +298,4 @@ public class EmailDetail extends BaseObservable implements Serializable {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getEmailDetailDao() : null;
     }
-
 }

@@ -18,7 +18,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
 public class EmailListAdapter extends BaseAdapter<EmailDetail, BaseViewHolder> {
-    private int type;
+    private int type = 1;
 
     public EmailListAdapter(Context context) {
         super(context);
@@ -49,7 +49,6 @@ public class EmailListAdapter extends BaseAdapter<EmailDetail, BaseViewHolder> {
     }
 
     public void goNext(EmailDetail item, int position) {
-
         item.setRead(true);
         notifyDataSetChanged();
         switch (type) {

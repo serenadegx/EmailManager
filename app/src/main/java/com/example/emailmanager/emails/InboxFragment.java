@@ -53,7 +53,7 @@ public class InboxFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        switch (getArguments().getInt(FLAG)) {
+        switch (type) {
             case INBOX:
                 viewModel.setLoadType(INBOX);
                 break;
@@ -78,6 +78,7 @@ public class InboxFragment extends Fragment {
     }
 
     public void setLoadType(int type) {
+        this.type = type;
         listAdapter.setType(type);
         switch (type) {
             case INBOX:
